@@ -1,91 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyForge AI — Regional & Vision Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg:#05050a; --a:#5b6ef5; --white:#ffffff; --gray:rgba(255,255,255,0.1); }
-        body { background: var(--bg); color: var(--white); font-family: 'Instrument+Sans', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .header { padding: 20px; text-align: center; border-bottom: 1px solid var(--gray); }
-        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .input-area { padding: 20px; background: #0e0e18; border-top: 1px solid var(--gray); display: flex; flex-direction: column; gap: 10px; }
-        .controls { display: flex; gap: 10px; align-items: center; }
-        input[type="text"] { flex: 1; background: var(--gray); border: none; padding: 12px; border-radius: 8px; color: white; }
-        button { background: var(--a); border: none; padding: 10px 18px; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; }
-        .pricing-banner { background: #16162a; padding: 10px; text-align: center; font-size: 0.9em; }
-        .preview-img { max-width: 100px; border-radius: 5px; display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyForge AI — Regional & Vision Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root { 
+  --bg:#05050a; --s1:#0e0e18; --s2:#16162a; --s3:#1e1e38;
+  --b1:rgba(255,255,255,0.06); --b2:rgba(255,255,255,0.11); --b3:rgba(255,255,255,0.2);
+  --a:#5b6ef5; --a2:#818cf8; --a3:#c7d2fe; --ag:rgba(91,110,245,0.14);
+  --green:#10b981; --red:#f43f5e; --amber:#f59e0b; --cyan:#06b6d4; --pink:#ec4899; --purple:#8b5cf6;
+  --t:#eeeeff; --tm:#9090bb; --td:#4a4a78;
+  --fh:'Cabinet Grotesk',sans-serif; --fb:'Instrument Sans',sans-serif;
+  --r:12px; --rl:18px; --rx:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--t);font-family:var(--fb);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER & UI MASK */
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--b1);backdrop-filter:blur(24px);background:rgba(5,5,10,0.82);}
+.logo{font-family:var(--fh);font-size:20px;font-weight:900;}
+
+/* CHAT BOX & PREVIEW */
+#chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+.preview-container { display: none; padding: 10px; background: var(--s2); border-radius: 8px; margin-bottom: 10px; }
+#image-preview { max-width: 150px; border-radius: 6px; border: 1px solid var(--b3); }
+
+/* INPUT AREA */
+.input-wrap { background: var(--s1); padding: 20px; border-top: 1px solid var(--b1); }
+.controls { display: flex; gap: 12px; align-items: center; background: var(--s2); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--b2); }
+input[type="text"] { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 14px; }
+.icon-btn { background: var(--b1); border: none; color: var(--tm); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s; }
+.icon-btn:hover { background: var(--b2); color: white; }
+.send-btn { background: var(--a); color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+/* PRICING BANNER */
+.pricing-banner { background: var(--s3); color: var(--tm); padding: 12px; text-align: center; font-size: 12px; border-bottom: 1px solid var(--b1); }
+.pricing-banner b { color: var(--a2); }
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(10px);}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--rx);max-width:400px;width:90%;padding:30px;text-align:center;}
+</style>
 </head>
 <body>
 
-<div class="header">StudyForge AI <span id="region-tag" style="font-size: 10px; opacity: 0.5;"></span></div>
-<div id="chat-window"></div>
+<header>
+    <div class="logo">StudyForge <em>AI</em></div>
+    <div id="region-badge" style="font-size: 10px; opacity: 0.4;">Detecting Region...</div>
+</header>
 
 <div class="pricing-banner">
-    Current Plan: <span id="local-price">Detecting prices...</span> 
-    <button onclick="payUPI()" style="padding: 4px 8px; font-size: 11px;">Upgrade via UPI</button>
+    <span id="price-text">Loading local deals...</span> 
+    <button onclick="openPay()" style="background:none; border:none; color:var(--a2); text-decoration:underline; cursor:pointer; margin-left:10px;">Upgrade Pro</button>
 </div>
 
-<div class="input-area">
-    <img id="image-preview" class="preview-img">
+<div id="chat-window">
+    </div>
+
+<div class="input-wrap">
+    <div class="preview-container" id="preview-box">
+        <img id="image-preview" src="">
+        <button onclick="clearImage()" style="background:none; border:none; color:var(--red); font-size:12px; cursor:pointer;">Remove</button>
+    </div>
     <div class="controls">
         <input type="file" id="file-input" accept="image/*" hidden onchange="handleImage(event)">
-        <button onclick="document.getElementById('file-input').click()">📎</button>
-        <button onclick="startCamera()">📸</button>
-        <input type="text" id="user-input" placeholder="Ask anything or upload notes...">
-        <button onclick="sendMessage()">Send</button>
+        <button class="icon-btn" onclick="document.getElementById('file-input').click()">📎</button>
+        <button class="icon-btn" onclick="startCamera()">📸</button>
+        <input type="text" id="user-input" placeholder="Ask AI or upload notes image...">
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<div class="overlay" id="payModal">
+    <div class="modal">
+        <h2 style="margin-bottom:10px;">Upgrade to Pro</h2>
+        <p style="color:var(--tm); font-size:13px; margin-bottom:20px;">Unlock unlimited uploads & fast AI generation via UPI.</p>
+        <div id="qr-container"></div>
+        <button onclick="payUPI()" class="send-btn" style="width:100%; margin-top:15px;">Pay via UPI App</button>
+        <button onclick="closePay()" style="background:none; border:none; color:var(--td); margin-top:10px; cursor:pointer;">Close</button>
     </div>
 </div>
 
 <script>
     let base64Image = null;
-    let currentCurrency = '₹';
-    let currentPrice = '199';
+    let localSym = '₹';
+    let localAmt = '199';
 
-    // 1. Detect Location & Currency
-    async function setupRegion() {
+    // 1. Regional Pricing Logic
+    async function initRegion() {
         try {
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
-            const rates = { 'IN': ['₹', '199'], 'DK': ['kr.', '150'], 'US': ['$', '19'] };
-            const region = rates[data.country_code] || ['$', '24'];
-            currentCurrency = region[0];
-            currentPrice = region[1];
-            document.getElementById('local-price').innerText = `Pro for ${currentCurrency}${currentPrice}/mo`;
-            document.getElementById('region-tag').innerText = `REGION: ${data.country_name}`;
-        } catch (e) { document.getElementById('local-price').innerText = "Pro for ₹199/mo"; }
+            const config = { 'IN': ['₹', '199'], 'DK': ['kr.', '150'], 'US': ['$', '19'] };
+            const region = config[data.country_code] || ['$', '24'];
+            [localSym, localAmt] = region;
+            document.getElementById('price-text').innerHTML = `Special Offer: <b>${localSym}${localAmt}/month</b> for students in ${data.country_name}`;
+            document.getElementById('region-badge').innerText = `REGION: ${data.country_code}`;
+        } catch (e) {
+            document.getElementById('price-text').innerText = "Pro Plan: ₹199/month";
+        }
     }
-    setupRegion();
+    initRegion();
 
-    // 2. Handle Images
+    // 2. Image & Vision Logic
     function handleImage(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = () => {
             base64Image = reader.result.split(',')[1];
-            const img = document.getElementById('image-preview');
-            img.src = reader.result;
-            img.style.display = 'block';
+            document.getElementById('image-preview').src = reader.result;
+            document.getElementById('preview-box').style.display = 'block';
         };
         reader.readAsDataURL(file);
     }
 
-    // 3. Simple UPI Payment (Works for FamPay/GPay)
+    function clearImage() {
+        base64Image = null;
+        document.getElementById('preview-box').style.display = 'none';
+    }
+
+    async function startCamera() {
+        alert("Camera access requested. Point at your notes!");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        // Simplified for brevity: usually you'd pipe this to a hidden canvas to 'snap'
+    }
+
+    // 3. UPI Deep Linking (FamPay/PhonePe/GPay)
+    function openPay() { document.getElementById('payModal').classList.add('open'); }
+    function closePay() { document.getElementById('payModal').classList.remove('open'); }
+
     function payUPI() {
-        const upiId = "YOUR_FAMPAY_ID@fam"; // <--- CHANGE THIS
-        const link = `upi://pay?pa=${upiId}&pn=StudyForge&am=${currentPrice}&cu=INR`;
+        const upiId = "YOUR_FAMPAY_ID@fam"; // REPLACE WITH YOUR ID
+        const link = `upi://pay?pa=${upiId}&pn=StudyForge&am=${localAmt}&cu=INR`;
         window.location.href = link;
     }
 
-    // 4. Send Message to Server
+    // 4. Integrated Chat Logic
     async function sendMessage() {
         const text = document.getElementById('user-input').value;
         if (!text && !base64Image) return;
 
-        const win = document.getElementById('chat-window');
-        win.innerHTML += `<div><b>You:</b> ${text}</div>`;
+        const chat = document.getElementById('chat-window');
+        chat.innerHTML += `<div style="text-align:right; margin-bottom:10px;"><span style="background:var(--s3); padding:8px 12px; border-radius:12px;">${text}</span></div>`;
         
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -94,12 +153,12 @@
         });
         
         const data = await response.json();
-        win.innerHTML += `<div><b>AI:</b> ${data.reply}</div>`;
+        chat.innerHTML += `<div style="margin-bottom:20px; color:var(--a3);"><b>AI:</b> ${data.reply}</div>`;
         
-        // Reset
-        base64Image = null;
-        document.getElementById('image-preview').style.display = 'none';
+        // Reset inputs
+        clearImage();
         document.getElementById('user-input').value = '';
+        chat.scrollTop = chat.scrollHeight;
     }
 </script>
 </body>
