@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+<head>
+  ...
+  <script type="module">
+    // console.log("Firebase loaded");
+  </script>
+</head><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,32 +20,30 @@
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-// ═══════════════════════════════════════════
-// PASTE YOUR FIREBASE CONFIG HERE
-// Get it: console.firebase.google.com
-// → New project → Web app → Register
-// ═══════════════════════════════════════════
 const cfg = {
-  apiKey:            "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
-  authDomain:        "studyforge-e153c.firebaseapp.com",
-  projectId:         "studyforge-e153c",
-  storageBucket:     "studyforge-e153c.firebasestorage.app",
+  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
+  authDomain: "studyforge-e153c.firebaseapp.com",
+  projectId: "studyforge-e153c",
+  storageBucket: "studyforge-e153c.firebasestorage.app",
   messagingSenderId: "691717656909",
-  appId:             ""1:691717656909:web:652e37ce9f8a0e6325a704"
-measurementId: "G-NNK2BLTSCR"
+  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
 };
-// ═══════════════════════════════════════════
 
-const app  = initializeApp(cfg);
+const app = initializeApp(cfg);
 const auth = getAuth(app);
-const gp   = new GoogleAuthProvider();
+const provider = new GoogleAuthProvider();
 
-window._sfSignIn  = async () => { try { const r = await signInWithPopup(auth, gp); window._sfOnUser(r.user); } catch(e) { window._sfToast('Sign in failed: '+e.message, true); } };
-window._sfSignOut = async () => { await signOut(auth); window._sfOnUser(null); };
-onAuthStateChanged(auth, u => { if(window._sfOnUser) window._sfOnUser(u); });
+window._sfSignIn = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    alert("Login success");
+  } catch (e) {
+    alert(e.message);
+  }
+};
 </script>
 
 <!-- Google AdSense — replace with your publisher ID -->
