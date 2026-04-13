@@ -11,7 +11,76 @@
 
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+let images = [];
 
+// 📁 FILE UPLOAD HANDLER
+const fileInput = document.getElementById("fileInput");
+
+if (fileInput) {
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+
+      images = [{
+        type: "image",
+        data: base64,
+        media_type: file.type
+      }];
+
+      console.log("✅ File ready");
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+// 🧠 GENERATE NOTES FUNCTION
+async function generateNotes() {
+  const promptInput = document.getElementById("topicInput");
+  const outputBox = document.getElementById("output");
+
+  const prompt = promptInput ? promptInput.value : "";
+
+  if (!prompt && images.length === 0) {
+    alert("Enter a topic or upload a file");
+    return;
+  }
+
+  outputBox.innerText = "⏳ Generating...";
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt,
+        images
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      outputBox.innerText = "❌ Error: " + data.error;
+      return;
+    }
+
+    outputBox.innerText = data.result;
+
+  } catch (err) {
+    outputBox.innerText = "❌ Failed to connect to server";
+    console.error(err);
+  }
+}
+</script>
 <!-- Firebase with real config -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
