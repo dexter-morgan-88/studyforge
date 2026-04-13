@@ -14,7 +14,42 @@
 
 <!-- Firebase with real config -->
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
+  authDomain: "studyforge-e153c.firebaseapp.com",
+  projectId: "studyforge-e153c",
+  storageBucket: "studyforge-e153c.firebasestorage.app",
+  messagingSenderId: "691717656909",
+  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+window._sfSignIn = async () => {
+  try {
+    const r = await auth.signInWithPopup(provider);
+    window._sfOnUser({
+      displayName: r.user.displayName,
+      photoURL: r.user.photoURL,
+      uid: r.user.uid,
+      isGuest: false
+    });
+  } catch(e) {
+    alert(e.message);
+  }
+};
+
+window._sfSignOut = async () => {
+  await auth.signOut();
+  window._sfOnUser(null);
+};
+</script>;
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
