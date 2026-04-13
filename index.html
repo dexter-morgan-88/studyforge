@@ -24,12 +24,12 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 // → New project → Web app → Register
 // ═══════════════════════════════════════════
 const cfg = {
-  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
-  authDomain: "studyforge-e153c.firebaseapp.com",
-  projectId: "studyforge-e153c",
-  storageBucket: "studyforge-e153c.firebasestorage.app",
-  messagingSenderId: "691717656909",
-  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
+  apiKey:            "YOUR_FIREBASE_API_KEY",
+  authDomain:        "YOUR_PROJECT.firebaseapp.com",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
 };
 // ═══════════════════════════════════════════
 
@@ -679,7 +679,7 @@ footer { position:relative; z-index:10; border-top:1px solid var(--b1); margin-t
     <div class="about-text">
       <h2>Built for students,<br>by a student. <span style="color:var(--green)">Free forever.</span></h2>
       <p>StudyForge AI was created with one simple belief: <span class="highlight">every student deserves access to the best study tools</span>, regardless of whether they can afford expensive subscriptions or coaching.</p>
-      <p>Many study tools lock their best features behind paywalls. We think that's wrong. Education should never be pay-to-win.</p>
+      <p>We've seen tools like Turbo.ai lock their best features behind paywalls. We think that's wrong. Education should never be pay-to-win. So we built StudyForge completely free — no premium plans, no hidden charges, no daily limits.</p>
       <p>We keep the lights on through non-intrusive Google ads, which means <span class="highlight">you get world-class AI study tools at zero cost</span>, and we stay sustainable. That's the deal.</p>
       <p style="color:var(--td);font-size:13px;">StudyForge AI uses advanced AI to generate educational content. Always verify important facts with your teacher or textbook. Results may vary by topic complexity.</p>
     </div>
@@ -734,7 +734,7 @@ footer { position:relative; z-index:10; border-top:1px solid var(--b1); margin-t
       <h5>About</h5>
       <a href="#tools">How it works</a>
       <a href="#" onclick="document.querySelector('.about-section').scrollIntoView({behavior:'smooth'})">Our mission</a>
-      <a href="mailto:hello@studyforge.ai">Contact us</a>
+      <a href="/cdn-cgi/l/email-protection#177f727b7b7857646362736e717865707239767e">Contact us</a>
       <a href="#">Privacy policy</a>
       <a href="#">Terms of service</a>
     </div>
@@ -747,7 +747,7 @@ footer { position:relative; z-index:10; border-top:1px solid var(--b1); margin-t
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API = '/api/chat';
 let user = null, uploads = [], tool = null, lastOut = '', qData = [], qAns = {}, qDone = 0;
 let ldInterval = null, ldPct = 0;
@@ -1055,16 +1055,83 @@ Target: exactly ~${w} words. Every sentence must earn its place.`;
   }
 }
 
+// ── SAFE JSON EXTRACTOR ───────────────────────────
+// Handles ALL the ways the AI might wrap JSON:
+// - ```json ... ``` fences
+// - Plain ``` ... ``` fences
+// - Extra sentences before/after JSON
+// - Nested objects, arrays
+function safeJSON(raw) {
+  if (!raw) return null;
+
+  // 1. Try raw parse first (ideal case)
+  try { return JSON.parse(raw.trim()); } catch(_) {}
+
+  // 2. Pull out first ```json ... ``` block
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) { try { return JSON.parse(fenced[1].trim()); } catch(_) {} }
+
+  // 3. Extract first [ ... ] array (handles extra text before/after)
+  const arrMatch = raw.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (arrMatch) { try { return JSON.parse(arrMatch[0]); } catch(_) {} }
+
+  // 4. Extract first { ... } object
+  const objMatch = raw.match(/\{[\s\S]*\}/);
+  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch(_) {} }
+
+  // 5. Strip everything before first [ or {
+  const arrStart = raw.indexOf('[');
+  const objStart = raw.indexOf('{');
+  const start = arrStart === -1 ? objStart : objStart === -1 ? arrStart : Math.min(arrStart, objStart);
+  if (start > -1) {
+    const slice = raw.slice(start);
+    // Find the matching closing bracket by counting depth
+    const open = slice[0], close = open === '[' ? ']' : '}';
+    let depth = 0, end = -1;
+    for (let i = 0; i < slice.length; i++) {
+      if (slice[i] === open) depth++;
+      else if (slice[i] === close) { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (end > -1) { try { return JSON.parse(slice.slice(0, end + 1)); } catch(_) {} }
+  }
+
+  return null; // all attempts failed
+}
+
 // ── RENDER OUTPUT ─────────────────────────────────
-function renderOut(t,raw){
+function renderOut(t, raw) {
   document.getElementById('wsOut').classList.add('show');
-  const titles={notes:'Your Notes',quiz:'Your Quiz',mindmap:'Mind Map',explain:'Explanation',flash:'Your Flashcards',essay:'Your Essay'};
-  document.getElementById('outTtl').textContent=titles[t];
-  const el=document.getElementById('outContent');
-  if(['notes','explain','essay'].includes(t)){el.innerHTML=`<div class="prose">${md2html(raw)}</div>`;}
-  else if(t==='quiz'){try{qData=JSON.parse(raw.replace(/```json|```/g,'').trim());qAns={};qDone=0;rQuiz(el);}catch{el.innerHTML=`<div class="prose">${md2html(raw)}</div>`;}}
-  else if(t==='mindmap'){try{rMM(el,JSON.parse(raw.replace(/```json|```/g,'').trim()));}catch{el.innerHTML=`<div class="prose">${md2html(raw)}</div>`;}}
-  else if(t==='flash'){try{rFlash(el,JSON.parse(raw.replace(/```json|```/g,'').trim()));}catch{el.innerHTML=`<div class="prose">${md2html(raw)}</div>`;}}
+  const titles = { notes:'Your Notes', quiz:'Your Quiz', mindmap:'Mind Map', explain:'Explanation', flash:'Your Flashcards', essay:'Your Essay' };
+  document.getElementById('outTtl').textContent = titles[t];
+  const el = document.getElementById('outContent');
+
+  if (['notes','explain','essay'].includes(t)) {
+    el.innerHTML = `<div class="prose">${md2html(raw)}</div>`;
+    return;
+  }
+
+  // For JSON tools — try to parse, fallback to prose
+  const parsed = safeJSON(raw);
+
+  if (t === 'quiz') {
+    if (parsed && Array.isArray(parsed) && parsed.length > 0 && parsed[0].question) {
+      qData = parsed; qAns = {}; qDone = 0; rQuiz(el);
+    } else {
+      el.innerHTML = `<div class="prose"><p style="color:var(--amber);font-weight:600;margin-bottom:12px;">⚠ Showing raw response — try again with a shorter topic for best results.</p>${md2html(raw)}</div>`;
+    }
+  } else if (t === 'mindmap') {
+    if (parsed && parsed.center && Array.isArray(parsed.branches)) {
+      rMM(el, parsed);
+    } else {
+      el.innerHTML = `<div class="prose"><p style="color:var(--amber);font-weight:600;margin-bottom:12px;">⚠ Mind map could not render — showing as text instead.</p>${md2html(raw)}</div>`;
+    }
+  } else if (t === 'flash') {
+    if (parsed && Array.isArray(parsed) && parsed.length > 0 && parsed[0].front) {
+      rFlash(el, parsed);
+    } else {
+      el.innerHTML = `<div class="prose"><p style="color:var(--amber);font-weight:600;margin-bottom:12px;">⚠ Showing raw response — try again for flashcard view.</p>${md2html(raw)}</div>`;
+    }
+  }
 }
 
 function md2html(s){
@@ -1156,11 +1223,4 @@ function doCopy(){navigator.clipboard.writeText(lastOut).then(()=>sf_toast('Copi
 // TOAST
 function sf_toast(msg,err=false){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show'+(err?' err':'');
-  setTimeout(()=>t.classList.remove('show'),3200);
-}
-window._sfToast=sf_toast;
-window.openTool=openTool;
-</script>
-</body>
-</html>
+  t.textContent=msg;t.className='toast show
