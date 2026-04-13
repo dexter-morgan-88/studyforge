@@ -1331,7 +1331,11 @@ function flipFC(i,total){
 // COPY
 function doCopy(){navigator.clipboard.writeText(lastOut).then(()=>sf_toast('Copied to clipboard! 📋')).catch(()=>sf_toast('Copy failed',true));}
 
-// TOAST
-function sf_toast(msg,err=false){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show
+// TOASTfunction sf_toast(msg, err = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => {
+    t.classList.remove('show');
+  }, 3000);
+}
