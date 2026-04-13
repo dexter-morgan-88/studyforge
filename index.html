@@ -12,29 +12,1329 @@
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
+<!-- Firebase with real config -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-// ═══════════════════════════════════════════
-// PASTE YOUR FIREBASE CONFIG HERE
-// Get it: console.firebase.google.com
-// → New project → Web app → Register
-// ═══════════════════════════════════════════
-const cfg = {
-  apiKey:            "YOUR_FIREBASE_API_KEY",
-  authDomain:        "YOUR_PROJECT.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
+  authDomain: "studyforge-e153c.firebaseapp.com",
+  projectId: "studyforge-e153c",
+  storageBucket: "studyforge-e153c.firebasestorage.app",
+  messagingSenderId: "691717656909",
+  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
 };
-// ═══════════════════════════════════════════
 
-const app  = initializeApp(cfg);
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const gp   = new GoogleAuthProvider();
+
+window._sfSignIn = async () => {
+  try {
+    const r = await signInWithPopup(auth, gp);
+    window._sfOnUser({
+      displayName: r.user.displayName,
+      photoURL:    r.user.photoURL,
+      uid:         r.user.uid,
+      isGuest:     false
+    });
+  } catch(e) {
+    if (e.code === 'auth/cancelled-popup-request') return;
+    if (e.code === 'auth/popup-blocked') {
+      window._sfToast('Pop-up blocked! Allow pop-ups for this site then try again.', true);
+    } else if (e.code === 'auth/unauthorized-domain') {
+      window._sfToast('Add your site URL to Firebase Authorized Domains.', true);
+    } else {
+      window._sfToast('Sign in failed: ' + e.message, true);
+    }
+  }
+};
+
+window._sfSignOut = async () => {
+  await signOut(auth);
+  window._sfOnUser(null);
+};
+
+onAuthStateChanged(auth, u => {
+  if (u && window._sfOnUser) {
+    window._sfOnUser({ displayName: u.displayName, photoURL: u.photoURL, uid: u.uid, isGuest: false });
+  }
+});
+
+window._fbReady = true;
+</script>
+
+<!-- Google AdSense — replace with your publisher ID -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<style>
+:root {
+  --bg: #060610;
+  --s1: #0d0d1f;
+  --s2: #131328;
+  --s3: #1a1a35;
+  --s4: #22224a;
+  --b1: rgba(255,255,255,0.05);
+  --b2: rgba(255,255,255,0.09);
+  --b3: rgba(255,255,255,0.16);
+  --b4: rgba(255,255,255,0.25);
+  --a:  #6366f1;
+  --a2: #818cf8;
+  --a3: #a5b4fc;
+  --ag: rgba(99,102,241,0.12);
+  --ab: rgba(99,102,241,0.06);
+  --green:  #22c55e;
+  --teal:   #14b8a6;
+  --amber:  #f59e0b;
+  --red:    #ef4444;
+  --pink:   #ec4899;
+  --purple: #a855f7;
+  --cyan:   #22d3ee;
+  --orange: #f97316;
+  --t:  #f0f0ff;
+  --tm: #8888bb;
+  --td: #44446a;
+  --fh: 'Bricolage Grotesque', sans-serif;
+  --fb: 'Nunito', sans-serif;
+  --r: 12px; --rl: 18px; --rx: 24px;
+  --shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--t); font-family: var(--fb); min-height: 100vh; overflow-x: hidden; }
+
+/* grain */
+body::after { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:998; }
+
+/* ambient */
+.amb { position:fixed; border-radius:50%; filter:blur(140px); pointer-events:none; z-index:0; animation: drift 20s ease-in-out infinite; }
+.amb1 { width:700px; height:700px; background:#4338ca; top:-300px; left:-250px; opacity:0.1; }
+.amb2 { width:600px; height:600px; background:#7e22ce; bottom:-200px; right:-200px; opacity:0.08; animation-delay:-10s; }
+.amb3 { width:400px; height:400px; background:#0e7490; top:35%; left:40%; opacity:0.06; animation-delay:-5s; }
+@keyframes drift { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-20px)} 66%{transform:translate(-20px,30px)} }
+
+/* ── AUTH GATE ── */
+#gate { position:fixed; inset:0; z-index:900; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:20px; }
+#gate.gone { display:none; }
+.gate-card { background:var(--s1); border:1px solid var(--b2); border-radius:var(--rx); padding:44px 36px 36px; max-width:420px; width:100%; text-align:center; position:relative; z-index:1; }
+.gate-logo { font-family:var(--fh); font-size:28px; font-weight:800; margin-bottom:4px; }
+.gate-logo em { font-style:normal; background:linear-gradient(135deg,#818cf8,#22d3ee); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.gate-tagline { font-size:13px; color:var(--tm); margin-bottom:28px; line-height:1.6; }
+.g-signin { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 20px; background:#fff; border:none; border-radius:var(--r); font-family:var(--fb); font-size:15px; font-weight:700; color:#1f1f1f; cursor:pointer; transition:all 0.2s; margin-bottom:18px; }
+.g-signin:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+.g-signin svg { width:20px; height:20px; flex-shrink:0; }
+.gate-feats { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:22px; text-align:left; }
+.gf { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tm); }
+.gf::before { content:'✓'; color:var(--green); font-weight:800; font-size:11px; }
+.gate-note { font-size:11px; color:var(--td); margin-top:16px; line-height:1.5; }
+.free-forever-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.25); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; color:var(--green); margin-bottom:16px; }
+
+/* ── NAV ── */
+nav { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:12px 28px; border-bottom:1px solid var(--b1); backdrop-filter:blur(28px); background:rgba(6,6,16,0.88); flex-wrap:wrap; gap:10px; }
+.nav-logo { font-family:var(--fh); font-size:19px; font-weight:800; display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--t); }
+.nav-logo .ico { width:30px; height:30px; background:linear-gradient(135deg,var(--a),var(--purple)); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.nav-logo em { font-style:normal; background:linear-gradient(90deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.navr { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.free-tag { display:flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); font-size:12px; font-weight:700; color:var(--green); }
+.free-tag .fdot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+.nbtn { padding:7px 15px; border-radius:20px; font-family:var(--fb); font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.2s; }
+.nbtn.solid { background:linear-gradient(135deg,var(--a),var(--purple)); color:#fff; }
+.nbtn.solid:hover { opacity:0.85; transform:translateY(-1px); }
+.nbtn.ghost { background:var(--s2); border:1px solid var(--b2); color:var(--tm); }
+.nbtn.ghost:hover { border-color:var(--b3); color:var(--t); }
+.uav { width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--a); display:none; }
+.uname { font-size:13px; color:var(--tm); display:none; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ── HERO ── */
+.hero { position:relative; z-index:10; max-width:900px; margin:0 auto; padding:72px 24px 56px; text-align:center; }
+.hero-pill { display:inline-flex; align-items:center; gap:8px; background:var(--ag); border:1px solid rgba(99,102,241,0.25); border-radius:20px; padding:6px 18px; font-size:12px; font-weight:600; color:var(--a2); margin-bottom:28px; letter-spacing:0.04em; }
+.hp-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+.hero h1 { font-family:var(--fh); font-size:clamp(38px,6vw,70px); font-weight:800; line-height:1.02; letter-spacing:-2.5px; margin-bottom:22px; }
+.h1-free { display:inline-block; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:12px; padding:0 14px; color:var(--green); font-size:0.6em; vertical-align:middle; margin-left:8px; letter-spacing:0; }
+.grad1 { background:linear-gradient(135deg,#818cf8,#22d3ee,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero p { font-size:17px; color:var(--tm); line-height:1.75; max-width:580px; margin:0 auto 32px; }
+.hero-stats { display:flex; align-items:center; justify-content:center; gap:28px; flex-wrap:wrap; margin-bottom:40px; }
+.hstat { text-align:center; }
+.hstat .hnum { font-family:var(--fh); font-size:24px; font-weight:800; background:linear-gradient(135deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hstat .hlbl { font-size:11px; color:var(--td); text-transform:uppercase; letter-spacing:0.08em; }
+.hdiv { width:1px; height:36px; background:var(--b2); }
+
+/* ad slot */
+.ad-slot { position:relative; z-index:10; max-width:900px; margin:0 auto 20px; padding:0 24px; text-align:center; }
+.ad-placeholder { background:var(--s1); border:1px dashed var(--b2); border-radius:var(--r); padding:20px; font-size:12px; color:var(--td); }
+
+/* ── TOOLS SECTION ── */
+.section { position:relative; z-index:10; max-width:1080px; margin:0 auto 60px; padding:0 20px; }
+.sec-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:8px; }
+.sec-title { font-family:var(--fh); font-size:22px; font-weight:800; }
+.sec-sub { font-size:13px; color:var(--tm); }
+
+.tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+
+.tc { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); overflow:hidden; cursor:pointer; transition:all 0.22s; position:relative; display:flex; flex-direction:column; }
+.tc:hover { transform:translateY(-3px); border-color:var(--b3); box-shadow:0 16px 48px rgba(0,0,0,0.4); }
+.tc.active { border-width:1.5px; }
+.tc[data-t="notes"].active  { border-color:rgba(34,197,94,0.6); }
+.tc[data-t="quiz"].active   { border-color:rgba(99,102,241,0.6); }
+.tc[data-t="mindmap"].active{ border-color:rgba(168,85,247,0.6); }
+.tc[data-t="explain"].active{ border-color:rgba(34,211,238,0.6); }
+.tc[data-t="flash"].active  { border-color:rgba(245,158,11,0.6); }
+.tc[data-t="essay"].active  { border-color:rgba(236,72,153,0.6); }
+
+.tc-top { padding:20px 20px 16px; flex:1; }
+.tc-bar { height:3px; width:100%; }
+.tc-bar-notes   { background:linear-gradient(90deg,#22c55e,#14b8a6); }
+.tc-bar-quiz    { background:linear-gradient(90deg,#6366f1,#818cf8); }
+.tc-bar-mindmap { background:linear-gradient(90deg,#a855f7,#ec4899); }
+.tc-bar-explain { background:linear-gradient(90deg,#22d3ee,#6366f1); }
+.tc-bar-flash   { background:linear-gradient(90deg,#f59e0b,#f97316); }
+.tc-bar-essay   { background:linear-gradient(90deg,#ec4899,#a855f7); }
+
+.tc-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:14px; }
+.ic-n{background:rgba(34,197,94,0.13);} .ic-q{background:rgba(99,102,241,0.13);}
+.ic-m{background:rgba(168,85,247,0.13);} .ic-e{background:rgba(34,211,238,0.13);}
+.ic-f{background:rgba(245,158,11,0.13);} .ic-w{background:rgba(236,72,153,0.13);}
+
+.tc h3 { font-family:var(--fh); font-size:16px; font-weight:700; margin-bottom:6px; }
+.tc p  { font-size:13px; color:var(--tm); line-height:1.6; }
+.tc-foot { padding:12px 20px; border-top:1px solid var(--b1); display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.15); }
+.ttag { font-size:10px; font-weight:800; padding:3px 9px; border-radius:6px; letter-spacing:0.06em; }
+.tag-free { background:rgba(34,197,94,0.12); color:var(--green); border:1px solid rgba(34,197,94,0.2); }
+.tc-arr { font-size:18px; color:var(--td); transition:all 0.2s; }
+.tc:hover .tc-arr { color:var(--t); transform:translate(3px,-3px); }
+
+/* ── WORKSPACE ── */
+.ws-wrap { position:relative; z-index:10; max-width:920px; margin:0 auto 80px; padding:0 20px; display:none; }
+.ws-wrap.open { display:block; animation:wsFadeUp 0.3s ease; }
+@keyframes wsFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.ws { background:var(--s1); border:1px solid var(--b2); border-radius:var(--rx); overflow:hidden; box-shadow:var(--shadow); }
+.wsh { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--b1); }
+.wshl { display:flex; align-items:center; gap:12px; }
+.ws-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.ws-ttl { font-family:var(--fh); font-size:17px; font-weight:800; }
+.ws-free-badge { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:3px 9px; font-size:10px; font-weight:700; color:var(--green); }
+.wscls { background:var(--s2); border:1px solid var(--b2); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--tm); font-size:16px; transition:all 0.15s; }
+.wscls:hover { color:var(--t); border-color:var(--b3); }
+.wbody { padding:24px; }
+
+/* form */
+.lbl { display:block; font-size:11px; font-weight:700; color:var(--td); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+textarea { width:100%; background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t); font-family:var(--fb); font-size:14px; line-height:1.7; padding:14px 16px; resize:vertical; min-height:110px; outline:none; transition:border-color 0.2s; }
+textarea:focus { border-color:var(--a); }
+textarea::placeholder { color:var(--td); }
+.r2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+.r3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px; }
+select { width:100%; background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t); font-family:var(--fb); font-size:13px; padding:10px 13px; outline:none; cursor:pointer; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2344446a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s; }
+select:focus { border-color:var(--a); }
+select option { background:#131328; }
+
+/* upload */
+.up-row { display:flex; gap:8px; margin-top:14px; }
+.upbtn { flex:1; padding:11px 14px; border-radius:var(--r); border:1px solid var(--b2); background:var(--s2); color:var(--tm); font-family:var(--fb); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all 0.2s; }
+.upbtn:hover { border-color:var(--a); color:var(--a2); background:var(--ab); }
+.file-prev { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.fp-item { position:relative; }
+.fp-item img { width:72px; height:72px; object-fit:cover; border-radius:9px; border:1px solid var(--b2); display:block; }
+.fp-doc { width:72px; height:72px; background:var(--s3); border-radius:9px; border:1px solid var(--b2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.fp-doc span { font-size:20px; }
+.fp-doc small { font-size:9px; color:var(--tm); text-transform:uppercase; font-weight:700; }
+.fp-name { font-size:9px; color:var(--tm); max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:3px; }
+.fp-rm { position:absolute; top:-5px; right:-5px; background:var(--red); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+
+/* go btn */
+.gbtn { width:100%; margin-top:18px; padding:14px; background:linear-gradient(135deg,var(--a),var(--purple)); border:none; border-radius:var(--r); color:#fff; font-family:var(--fh); font-size:16px; font-weight:800; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.01em; }
+.gbtn:hover { opacity:0.88; transform:translateY(-1px); box-shadow:0 8px 32px rgba(99,102,241,0.35); }
+.gbtn:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* loading */
+.ws-load { display:none; text-align:center; padding:52px 24px; }
+.ws-load.show { display:block; }
+.spinner { display:inline-block; width:48px; height:48px; border:3px solid var(--b2); border-top-color:var(--a); border-radius:50%; animation:spin 0.7s linear infinite; margin-bottom:18px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.ws-load h3 { font-family:var(--fh); font-size:17px; font-weight:700; margin-bottom:6px; }
+.ws-load p { font-size:13px; color:var(--tm); }
+.load-bar { width:200px; height:3px; background:var(--s3); border-radius:3px; margin:16px auto 0; overflow:hidden; }
+.load-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--a),var(--purple)); border-radius:3px; transition:width 0.4s ease; }
+
+/* output */
+.ws-out { display:none; }
+.ws-out.show { display:block; }
+.out-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.out-bar h3 { font-family:var(--fh); font-size:16px; font-weight:800; }
+.out-acts { display:flex; gap:7px; }
+.oab { padding:7px 14px; border-radius:9px; font-family:var(--fb); font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--b2); background:var(--s2); color:var(--tm); transition:all 0.15s; }
+.oab:hover { border-color:var(--b3); color:var(--t); }
+.oab.pri { background:var(--ab); border-color:rgba(99,102,241,0.3); color:var(--a2); }
+
+/* prose */
+.prose { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:26px; line-height:1.82; }
+.prose h1 { font-family:var(--fh); font-size:23px; font-weight:800; margin-bottom:10px; color:var(--t); }
+.prose h2 { font-family:var(--fh); font-size:18px; font-weight:700; margin:24px 0 10px; color:var(--a2); border-bottom:1px solid var(--b1); padding-bottom:6px; }
+.prose h3 { font-family:var(--fh); font-size:15px; font-weight:700; margin:16px 0 7px; color:var(--cyan); }
+.prose p  { font-size:14px; color:var(--tm); margin-bottom:12px; line-height:1.8; }
+.prose ul,.prose ol { margin:8px 0 14px 22px; }
+.prose li { font-size:14px; color:var(--tm); margin-bottom:7px; line-height:1.7; }
+.prose strong { color:var(--t); font-weight:700; }
+.prose em { color:var(--a3); font-style:italic; }
+.prose blockquote { border-left:3px solid var(--cyan); padding:12px 18px; background:rgba(34,211,238,0.06); border-radius:0 10px 10px 0; margin:14px 0; color:var(--t); font-style:italic; font-size:14px; }
+.prose code { background:var(--s3); padding:2px 7px; border-radius:5px; font-family:monospace; font-size:12px; color:var(--a3); }
+.prose table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
+.prose th { background:var(--s3); padding:9px 13px; text-align:left; font-weight:700; border:1px solid var(--b2); color:var(--t); }
+.prose td { padding:9px 13px; border:1px solid var(--b1); color:var(--tm); }
+.prose hr { border:none; border-top:1px solid var(--b1); margin:18px 0; }
+
+/* quiz */
+.qscore { display:none; background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:18px 22px; margin-bottom:16px; align-items:center; gap:18px; }
+.qscore.show { display:flex; }
+.sbig { font-family:var(--fh); font-size:36px; font-weight:800; }
+.qscore-right { flex:1; }
+.qscore-msg { font-family:var(--fh); font-size:15px; font-weight:700; margin-bottom:4px; }
+.qscore-sub { font-size:12px; color:var(--tm); margin-bottom:8px; }
+.strack { height:6px; background:var(--s3); border-radius:6px; overflow:hidden; }
+.sfill  { height:100%; border-radius:6px; transition:width 1.2s ease; }
+.qcard { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:22px; margin-bottom:13px; }
+.qnum  { font-size:10px; font-weight:800; color:var(--a2); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+.qtxt  { font-size:15px; font-weight:600; line-height:1.55; margin-bottom:16px; }
+.olist { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.ob { width:100%; text-align:left; padding:11px 16px; background:var(--s1); border:1px solid var(--b2); border-radius:11px; color:var(--t); font-family:var(--fb); font-size:13px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:11px; }
+.ob:hover:not(:disabled) { border-color:var(--a); background:var(--ag); }
+.ol { width:24px; height:24px; border-radius:7px; background:var(--s3); border:1px solid var(--b2); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--tm); transition:all 0.15s; }
+.ob:hover:not(:disabled) .ol { background:var(--a); color:#fff; border-color:var(--a); }
+.ob.ok { background:rgba(34,197,94,0.1); border-color:var(--green); color:var(--green); }
+.ob.ok .ol { background:var(--green); color:#000; border-color:var(--green); }
+.ob.no { background:rgba(239,68,68,0.1); border-color:var(--red); color:var(--red); }
+.ob.no .ol { background:var(--red); color:#fff; border-color:var(--red); }
+.ob:disabled { cursor:default; }
+.qexp { display:none; margin-top:12px; padding:12px 16px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:10px; font-size:13px; color:var(--a3); line-height:1.65; }
+.qexp.show { display:block; }
+
+/* flashcards */
+.fc-intro { font-size:12px; color:var(--td); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.fc-prog { font-size:12px; color:var(--tm); }
+.fgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:13px; }
+.fc { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:20px; cursor:pointer; transition:all 0.25s; min-height:130px; display:flex; flex-direction:column; justify-content:space-between; }
+.fc:hover { border-color:var(--b3); transform:translateY(-2px); }
+.fc.flp { background:var(--s3); border-color:var(--a2); }
+.fc-f { font-size:14px; font-weight:600; line-height:1.5; }
+.fc-b { display:none; font-size:13px; color:var(--a3); line-height:1.65; }
+.fc.flp .fc-f { display:none; }
+.fc.flp .fc-b { display:block; }
+.fc-hint { font-size:10px; color:var(--td); margin-top:10px; display:flex; align-items:center; gap:4px; }
+.fc-hint::before { content:'↩'; font-size:11px; }
+
+/* mindmap */
+.mm-wrap { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:20px; overflow-x:auto; }
+.mm-wrap svg { display:block; margin:0 auto; }
+
+/* ── ABOUT / INFO SECTION ── */
+.about-section { position:relative; z-index:10; max-width:1080px; margin:0 auto 80px; padding:0 20px; }
+.about-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:48px; align-items:center; }
+.about-text h2 { font-family:var(--fh); font-size:30px; font-weight:800; line-height:1.2; margin-bottom:16px; letter-spacing:-0.5px; }
+.about-text p { font-size:15px; color:var(--tm); line-height:1.8; margin-bottom:14px; }
+.about-text .highlight { color:var(--green); font-weight:700; }
+.about-cards { display:flex; flex-direction:column; gap:12px; }
+.about-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
+.about-card-ico { font-size:22px; flex-shrink:0; margin-top:2px; }
+.about-card h4 { font-family:var(--fh); font-size:14px; font-weight:700; margin-bottom:4px; }
+.about-card p { font-size:12px; color:var(--tm); line-height:1.6; margin:0; }
+
+/* ── MISSION STRIP ── */
+.mission { position:relative; z-index:10; background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(168,85,247,0.06)); border:1px solid rgba(99,102,241,0.15); border-radius:var(--rx); max-width:1080px; margin:0 auto 80px; padding:44px 48px; text-align:center; }
+.mission h2 { font-family:var(--fh); font-size:28px; font-weight:800; margin-bottom:12px; }
+.mission p { font-size:15px; color:var(--tm); line-height:1.8; max-width:620px; margin:0 auto 24px; }
+.mission-pills { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.mp { display:inline-flex; align-items:center; gap:6px; background:var(--s2); border:1px solid var(--b2); border-radius:20px; padding:7px 16px; font-size:13px; color:var(--tm); font-weight:600; }
+.mp::before { content:'✓'; color:var(--green); font-weight:800; }
+
+/* ── HOW IT WORKS ── */
+.hiw { position:relative; z-index:10; max-width:1080px; margin:0 auto 80px; padding:0 20px; }
+.hiw-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; margin-top:24px; }
+.hiw-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); padding:24px; position:relative; overflow:hidden; }
+.hiw-num { font-family:var(--fh); font-size:56px; font-weight:900; color:rgba(99,102,241,0.08); position:absolute; top:10px; right:16px; line-height:1; }
+.hiw-ico { font-size:28px; margin-bottom:14px; }
+.hiw-card h4 { font-family:var(--fh); font-size:16px; font-weight:700; margin-bottom:7px; }
+.hiw-card p { font-size:13px; color:var(--tm); line-height:1.65; }
+
+/* ── FOOTER ── */
+footer { position:relative; z-index:10; border-top:1px solid var(--b1); margin-top:20px; }
+.footer-main { max-width:1080px; margin:0 auto; padding:48px 24px 32px; display:grid; grid-template-columns:2fr 1fr 1fr; gap:48px; }
+.footer-brand .fl { font-family:var(--fh); font-size:20px; font-weight:800; margin-bottom:10px; }
+.footer-brand .fl em { font-style:normal; background:linear-gradient(90deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.footer-brand p { font-size:13px; color:var(--tm); line-height:1.7; max-width:280px; margin-bottom:14px; }
+.footer-free-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; color:var(--green); }
+.footer-col h5 { font-family:var(--fh); font-size:13px; font-weight:700; color:var(--t); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.08em; }
+.footer-col a { display:block; font-size:13px; color:var(--tm); text-decoration:none; margin-bottom:9px; transition:color 0.15s; }
+.footer-col a:hover { color:var(--t); }
+.footer-bottom { border-top:1px solid var(--b1); padding:16px 24px; max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.footer-bottom p { font-size:12px; color:var(--td); }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--s1); border:1px solid var(--green); border-radius:13px; padding:12px 24px; font-size:13px; color:var(--green); font-weight:700; z-index:800; opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.err { border-color:var(--red); color:var(--red); }
+
+/* hidden inputs */
+#fi,#ci { display:none; }
+
+@media(max-width:768px) {
+  nav { padding:12px 16px; }
+  .hero { padding:48px 16px 40px; }
+  .about-grid { grid-template-columns:1fr; gap:28px; }
+  .footer-main { grid-template-columns:1fr; gap:28px; }
+  .tools-grid { grid-template-columns:1fr; }
+  .r2,.r3 { grid-template-columns:1fr; }
+  .mission { padding:28px 20px; margin:0 20px 60px; }
+  .wbody { padding:16px; }
+  .up-row { flex-direction:column; }
+  .hiw-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:480px) {
+  .hiw-grid { grid-template-columns:1fr; }
+  .hero h1 { letter-spacing:-1.5px; }
+  .footer-main { padding:32px 16px 24px; }
+}
+</style>
+</head>
+<body>
+<div class="amb amb1"></div><div class="amb amb2"></div><div class="amb amb3"></div>
+<input type="file" id="fi" accept="image/*,.pdf,.txt,.doc,.docx" multiple>
+<input type="file" id="ci" accept="image/*" capture="environment">
+
+<!-- ═══ GATE ═══ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="free-forever-badge">🎓 100% Free Forever</div>
+    <div class="gate-logo">Study<em>Forge</em> AI</div>
+    <p class="gate-tagline">The most powerful free AI study platform.<br>No payment. No limits. Just learning.</p>
+
+    <!-- Google Sign In -->
+    <button class="g-signin" id="gSignInBtn" onclick="doGoogleSignIn()">
+      <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
+      <div style="flex:1;height:1px;background:var(--b2)"></div>
+      <span style="font-size:12px;color:var(--td)">or</span>
+      <div style="flex:1;height:1px;background:var(--b2)"></div>
+    </div>
+
+    <!-- Guest option -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="guestName" type="text" placeholder="Enter your name (optional)" maxlength="30"
+        style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);color:var(--t);font-family:var(--fb);font-size:14px;padding:11px 14px;outline:none;transition:border-color 0.2s;"
+        onkeydown="if(event.key==='Enter')startGuest()"
+        onfocus="this.style.borderColor='var(--a)'" onblur="this.style.borderColor='var(--b2)'">
+      <button onclick="startGuest()"
+        style="padding:11px 20px;background:linear-gradient(135deg,var(--a),var(--purple));border:none;border-radius:var(--r);color:#fff;font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;"
+        onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        Start Free →
+      </button>
+    </div>
+    <p style="font-size:11px;color:var(--td);margin-bottom:0;text-align:center;">No email or password needed. Just click Start Free.</p>
+
+    <div class="gate-feats" style="margin-top:20px;">
+      <div class="gf">All 6 AI tools</div>
+      <div class="gf">Unlimited uses</div>
+      <div class="gf">Upload photos & files</div>
+      <div class="gf">Camera capture</div>
+      <div class="gf">JEE · NEET · CBSE</div>
+      <div class="gf">SAT · GCSE · IB</div>
+      <div class="gf">Works on any device</div>
+      <div class="gf">100% Free forever</div>
+    </div>
+    <p class="gate-note" style="margin-top:16px;">No payment. No spam. No data selling.<br>Built by a student, for students 🇮🇳</p>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a class="nav-logo" href="#"><div class="ico">⚡</div>Study<em>Forge</em> AI</a>
+  <div class="navr">
+    <div class="free-tag"><div class="fdot"></div>Free Forever</div>
+    <span class="uname" id="uname"></span>
+    <img class="uav" id="uav" src="" alt="avatar">
+    <button class="nbtn ghost" id="soBtn" onclick="window._sfSignOut && window._sfSignOut()" style="display:none">Sign out</button>
+    <a href="#tools" class="nbtn solid">Open Tools ↓</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-pill"><div class="hp-dot"></div>Completely Free · No Sign-up Fee · No Premium Plans</div>
+  <h1>The AI study tool<br><span class="grad1">every student deserves</span><span class="h1-free">FREE</span></h1>
+  <p>Notes, quizzes, mind maps, flashcards, topic explainers and essays — all powered by advanced AI. Upload a photo of your textbook page and get instant study material.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hnum">6</div><div class="hlbl">AI Tools</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">∞</div><div class="hlbl">Unlimited Uses</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">₹0</div><div class="hlbl">Forever Free</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">40MB</div><div class="hlbl">File Upload</div></div>
+  </div>
+</div>
+
+<!-- Ad Slot (top) -->
+<div class="ad-slot">
+  <!-- Replace this with your actual AdSense code after approval -->
+  <div class="ad-placeholder">📢 Advertisement — This keeps StudyForge free for everyone</div>
+</div>
+
+<!-- ═══ TOOLS ═══ -->
+<div class="section" id="tools">
+  <div class="sec-head">
+    <div class="sec-title">All tools — all free, always</div>
+    <div class="sec-sub">Upload a photo or file to use with any tool</div>
+  </div>
+  <div class="tools-grid">
+    <div class="tc" data-t="notes" onclick="openTool('notes')">
+      <div class="tc-bar tc-bar-notes"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-n">📝</div>
+        <h3>Detailed Notes Maker</h3>
+        <p>Exam-ready structured notes on any topic. 4 depth levels from quick overview to ultra-comprehensive. Upload a textbook page photo for instant digital notes.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="quiz" onclick="openTool('quiz')">
+      <div class="tc-bar tc-bar-quiz"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-q">🎯</div>
+        <h3>AI Quiz Generator</h3>
+        <p>Full MCQ tests with live scoring and detailed explanations for every answer. Supports JEE, NEET, CBSE, SAT, GCSE, IB. Upload notes to quiz from them directly.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="mindmap" onclick="openTool('mindmap')">
+      <div class="tc-bar tc-bar-mindmap"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-m">🧠</div>
+        <h3>Revision Mind Map</h3>
+        <p>Visual branching mind maps of any topic or subject. See the whole syllabus connected at a glance. Perfect for the night before an exam.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="explain" onclick="openTool('explain')">
+      <div class="tc-bar tc-bar-explain"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-e">💡</div>
+        <h3>Topic Explainer</h3>
+        <p>Any concept explained with crystal clarity. Choose "like I'm 10", student mode, or full advanced depth. Upload a confusing page and get it made simple instantly.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="flash" onclick="openTool('flash')">
+      <div class="tc-bar tc-bar-flash"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-f">⚡</div>
+        <h3>Flashcard Generator</h3>
+        <p>Instant tap-to-flip revision card decks. Upload a chapter page and get a full deck made from it. Great for spaced repetition and last-minute cramming.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="essay" onclick="openTool('essay')">
+      <div class="tc-bar tc-bar-essay"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-w">✍️</div>
+        <h3>Essay & Assignment Writer</h3>
+        <p>Properly structured, argued essays from school to university level. Argumentative, analytical, descriptive or comparative. Every paragraph earns its place.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKSPACE ═══ -->
+<div class="ws-wrap" id="wsWrap">
+<div class="ws">
+  <div class="wsh">
+    <div class="wshl">
+      <div class="ws-ico" id="wsIco"></div>
+      <div class="ws-ttl" id="wsTtl">Tool</div>
+      <span class="ws-free-badge">FREE</span>
+    </div>
+    <div class="wscls" onclick="closeTool()">✕</div>
+  </div>
+  <div class="wbody">
+
+    <!-- NOTES FORM -->
+    <div id="f-notes" style="display:none">
+      <span class="lbl">Topic — or upload a photo/file of your textbook/notes below</span>
+      <textarea id="i-notes" placeholder="e.g. Photosynthesis, Newton's Laws, Organic Chemistry, The French Revolution...&#10;&#10;Or leave this blank and upload a photo of your textbook page — AI will read it."></textarea>
+      <div class="r2">
+        <div><span class="lbl">Detail level</span>
+          <select id="n-det">
+            <option value="overview">Overview — 5 min quick revision</option>
+            <option value="standard" selected>Standard — full exam prep</option>
+            <option value="detailed">Detailed — deep understanding</option>
+            <option value="ultra">Ultra — cover absolutely everything</option>
+          </select>
+        </div>
+        <div><span class="lbl">Subject area</span>
+          <select id="n-sub">
+            <option value="any">General / Any subject</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
+            <option value="maths">Mathematics</option>
+            <option value="history">History / Social Studies</option>
+            <option value="geography">Geography</option>
+            <option value="english">English / Literature</option>
+            <option value="economics">Economics / Business</option>
+            <option value="cs">Computer Science</option>
+            <option value="hindi">Hindi</option>
+          </select>
+        </div>
+      </div>
+      <div id="up-notes"></div>
+      <button class="gbtn" onclick="go('notes')">📝 Generate Detailed Notes</button>
+    </div>
+
+    <!-- QUIZ FORM -->
+    <div id="f-quiz" style="display:none">
+      <span class="lbl">Topic or paste your notes</span>
+      <textarea id="i-quiz" placeholder="Enter a topic like 'Electromagnetic Induction' or paste your own notes here...&#10;Or upload a photo of your notes below."></textarea>
+      <div class="r3">
+        <div><span class="lbl">Questions</span>
+          <select id="q-n"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select>
+        </div>
+        <div><span class="lbl">Difficulty</span>
+          <select id="q-d"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option><option value="mixed">Mixed</option></select>
+        </div>
+        <div><span class="lbl">Exam style</span>
+          <select id="q-s"><option value="general">General</option><option value="JEE/NEET">JEE/NEET</option><option value="CBSE/ICSE">CBSE/ICSE</option><option value="SAT/ACT">SAT/ACT</option><option value="GCSE/A-Level">GCSE/A-Level</option><option value="IB">IB</option></select>
+        </div>
+      </div>
+      <div id="up-quiz"></div>
+      <button class="gbtn" onclick="go('quiz')">🎯 Generate Quiz</button>
+    </div>
+
+    <!-- MINDMAP FORM -->
+    <div id="f-mindmap" style="display:none">
+      <span class="lbl">Topic for mind map</span>
+      <textarea id="i-mindmap" placeholder="e.g. World War II, Cell Division, Calculus, Climate Change, Indian History..." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Number of branches</span>
+          <select id="mm-b"><option value="5">5 branches</option><option value="7" selected>7 branches</option><option value="8">8 branches</option></select>
+        </div>
+        <div><span class="lbl">Detail depth</span>
+          <select id="mm-d"><option value="shallow">Shallow</option><option value="medium" selected>Medium</option><option value="deep">Deep</option></select>
+        </div>
+      </div>
+      <button class="gbtn" onclick="go('mindmap')">🧠 Generate Mind Map</button>
+    </div>
+
+    <!-- EXPLAIN FORM -->
+    <div id="f-explain" style="display:none">
+      <span class="lbl">What do you want explained?</span>
+      <textarea id="i-explain" placeholder="e.g. Quantum entanglement, Supply and demand, DNA replication, Integration by parts...&#10;Or upload a confusing textbook page below." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Explanation level</span>
+          <select id="e-l"><option value="child">Like I'm 10 years old</option><option value="student" selected>Student — clear & thorough</option><option value="advanced">Advanced — full technical depth</option></select>
+        </div>
+        <div><span class="lbl">Style</span>
+          <select id="e-s"><option value="analogy">Real-world analogies</option><option value="example" selected>Worked examples</option><option value="both">Analogies + examples both</option><option value="plain">Plain clear explanation</option></select>
+        </div>
+      </div>
+      <div id="up-explain"></div>
+      <button class="gbtn" onclick="go('explain')">💡 Explain This Clearly</button>
+    </div>
+
+    <!-- FLASHCARD FORM -->
+    <div id="f-flash" style="display:none">
+      <span class="lbl">Topic for flashcards</span>
+      <textarea id="i-flash" placeholder="e.g. Biology definitions, French vocabulary, Historical dates, Physics formulas, Chemical equations..." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Number of cards</span>
+          <select id="fl-n"><option value="10">10 cards</option><option value="15" selected>15 cards</option><option value="20">20 cards</option><option value="30">30 cards</option></select>
+        </div>
+        <div><span class="lbl">Card type</span>
+          <select id="fl-t"><option value="term-def" selected>Term → Definition</option><option value="q-a">Question → Answer</option><option value="concept-ex">Concept → Example</option></select>
+        </div>
+      </div>
+      <div id="up-flash"></div>
+      <button class="gbtn" onclick="go('flash')">⚡ Create Flashcards</button>
+    </div>
+
+    <!-- ESSAY FORM -->
+    <div id="f-essay" style="display:none">
+      <span class="lbl">Essay title or question</span>
+      <textarea id="i-essay" placeholder="e.g. 'Critically analyse the causes of World War I'&#10;'The impact of social media on teenage mental health'&#10;'Compare photosynthesis and cellular respiration'" rows="3"></textarea>
+      <div class="r3">
+        <div><span class="lbl">Word count</span>
+          <select id="es-w"><option value="300">~300 words</option><option value="500" selected>~500 words</option><option value="800">~800 words</option><option value="1200">~1200 words</option></select>
+        </div>
+        <div><span class="lbl">Essay type</span>
+          <select id="es-t"><option value="argumentative">Argumentative</option><option value="analytical" selected>Analytical</option><option value="descriptive">Descriptive</option><option value="comparative">Comparative</option></select>
+        </div>
+        <div><span class="lbl">Academic level</span>
+          <select id="es-l"><option value="school">School</option><option value="college" selected>College</option><option value="university">University</option></select>
+        </div>
+      </div>
+      <button class="gbtn" onclick="go('essay')">✍️ Write Essay</button>
+    </div>
+
+    <!-- LOADING -->
+    <div class="ws-load" id="wsLoad">
+      <div class="spinner"></div>
+      <h3 id="ldTxt">AI is thinking...</h3>
+      <p id="ldTip">Usually takes 5–15 seconds</p>
+      <div class="load-bar"><div class="load-bar-fill" id="ldBar"></div></div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="ws-out" id="wsOut">
+      <div class="out-bar">
+        <h3 id="outTtl">Result</h3>
+        <div class="out-acts">
+          <button class="oab" onclick="doCopy()">📋 Copy</button>
+          <button class="oab pri" onclick="showForm()">↺ New</button>
+        </div>
+      </div>
+      <div id="outContent"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- Ad Slot (mid) -->
+<div class="ad-slot">
+  <div class="ad-placeholder">📢 Advertisement — Keeping StudyForge free for every student</div>
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div class="hiw section">
+  <div class="sec-head"><div class="sec-title">How it works</div><div class="sec-sub">Three steps to smarter studying</div></div>
+  <div class="hiw-grid">
+    <div class="hiw-card"><div class="hiw-num">1</div><div class="hiw-ico">🔐</div><h4>Sign in with Google</h4><p>One tap with your Google account. No password, no form, no payment. Your progress is saved automatically.</p></div>
+    <div class="hiw-card"><div class="hiw-num">2</div><div class="hiw-ico">📸</div><h4>Type a topic or upload</h4><p>Enter any topic, paste your notes, or take a photo of your textbook page. AI reads images and handwriting.</p></div>
+    <div class="hiw-card"><div class="hiw-num">3</div><div class="hiw-ico">⚡</div><h4>Get instant results</h4><p>Detailed notes, quizzes, mind maps, flashcards — generated in seconds. Copy, study, and ace your exams.</p></div>
+    <div class="hiw-card"><div class="hiw-num">4</div><div class="hiw-ico">🔄</div><h4>Unlimited, forever</h4><p>No daily limits, no premium tier, no credit system. Use every tool as many times as you want. Always free.</p></div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<div class="about-section section">
+  <div class="about-grid">
+    <div class="about-text">
+      <h2>Built for students,<br>by a student. <span style="color:var(--green)">Free forever.</span></h2>
+      <p>StudyForge AI was created with one simple belief: <span class="highlight">every student deserves access to the best study tools</span>, regardless of whether they can afford expensive subscriptions or coaching.</p>
+      <p>We've seen tools like Turbo.ai lock their best features behind paywalls. We think that's wrong. Education should never be pay-to-win. So we built StudyForge completely free — no premium plans, no hidden charges, no daily limits.</p>
+      <p>We keep the lights on through non-intrusive Google ads, which means <span class="highlight">you get world-class AI study tools at zero cost</span>, and we stay sustainable. That's the deal.</p>
+      <p style="color:var(--td);font-size:13px;">StudyForge AI uses advanced AI to generate educational content. Always verify important facts with your teacher or textbook. Results may vary by topic complexity.</p>
+    </div>
+    <div class="about-cards">
+      <div class="about-card"><div class="about-card-ico">🎓</div><div><h4>Education-first</h4><p>Every feature is designed to genuinely help students learn — not just to look impressive. We focus on what actually improves exam performance.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">🔒</div><div><h4>Privacy by design</h4><p>We never sell your data. We never spam. Your notes and uploads are used only to generate your results and are never stored or shared.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">🌍</div><div><h4>Works for every exam</h4><p>JEE, NEET, CBSE, ICSE, SAT, ACT, GCSE, A-Level, IB — our tools understand the style and depth required for every major exam system.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">📱</div><div><h4>Works on any device</h4><p>Phone, tablet, laptop — StudyForge is fully responsive. Use the camera feature on mobile to photograph your notes and get instant study material.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MISSION ═══ -->
+<div class="mission" style="margin:0 20px 80px;">
+  <h2>Our mission is simple 🎯</h2>
+  <p>Make the best AI study tools available to every student in the world — from someone in a small town in Rajasthan to a student in London. No paywalls. No gatekeeping. Just learning.</p>
+  <div class="mission-pills">
+    <span class="mp">Completely free, always</span>
+    <span class="mp">No premium plans ever</span>
+    <span class="mp">No daily usage limits</span>
+    <span class="mp">Works for every subject</span>
+    <span class="mp">Works for every exam</span>
+    <span class="mp">Camera & file upload</span>
+    <span class="mp">No data selling</span>
+    <span class="mp">Built by a student</span>
+  </div>
+</div>
+
+<!-- Ad Slot (bottom) -->
+<div class="ad-slot" style="margin-bottom:60px;">
+  <div class="ad-placeholder">📢 Advertisement</div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="fl">Study<em>Forge</em> AI</div>
+      <p>The most powerful free AI study platform. Notes, quizzes, mind maps, flashcards, explanations and essays — completely free for every student, everywhere, forever.</p>
+      <div class="footer-free-badge">✓ Free Forever · No Premium Plans</div>
+    </div>
+    <div class="footer-col">
+      <h5>Tools</h5>
+      <a href="#" onclick="openTool('notes')">Notes Maker</a>
+      <a href="#" onclick="openTool('quiz')">Quiz Generator</a>
+      <a href="#" onclick="openTool('mindmap')">Mind Maps</a>
+      <a href="#" onclick="openTool('explain')">Topic Explainer</a>
+      <a href="#" onclick="openTool('flash')">Flashcards</a>
+      <a href="#" onclick="openTool('essay')">Essay Writer</a>
+    </div>
+    <div class="footer-col">
+      <h5>About</h5>
+      <a href="#tools">How it works</a>
+      <a href="#" onclick="document.querySelector('.about-section').scrollIntoView({behavior:'smooth'})">Our mission</a>
+      <a href="/cdn-cgi/l/email-protection#177f727b7b7857646362736e717865707239767e">Contact us</a>
+      <a href="#">Privacy policy</a>
+      <a href="#">Terms of service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 StudyForge AI · Made with ❤️ for students everywhere · Powered by Claude AI</p>
+    <p style="color:var(--td)">Free forever · No premium · No paywalls</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const API = '/api/chat';
+let user = null, uploads = [], tool = null, lastOut = '', qData = [], qAns = {}, qDone = 0;
+let ldInterval = null, ldPct = 0;
+
+// ── AUTH ──────────────────────────────────────────
+
+function doGoogleSignIn() {
+  if (window._sfSignIn) {
+    window._sfSignIn();
+  } else {
+    // Firebase still loading — wait and retry
+    sf_toast('Loading Google Sign In, one sec...', false);
+    let tries = 0;
+    const wait = setInterval(() => {
+      tries++;
+      if (window._sfSignIn) { clearInterval(wait); window._sfSignIn(); }
+      else if (tries > 20) { clearInterval(wait); sf_toast('Google Sign In unavailable. Use Start Free instead.', true); }
+    }, 300);
+  }
+}
+
+function startGuest() {
+  const n = (document.getElementById('guestName').value || '').trim();
+  window._sfOnUser({ displayName: n || 'Student', photoURL: null, uid: 'g_' + Date.now(), isGuest: true });
+}
+
+window._sfOnUser = function(u) {
+  user = u;
+  if (u) {
+    document.getElementById('gate').classList.add('gone');
+    const nm = document.getElementById('uname');
+    nm.textContent = (u.displayName || 'Student').split(' ')[0];
+    nm.style.display = 'block';
+    if (u.photoURL) { const av=document.getElementById('uav'); av.src=u.photoURL; av.style.display='block'; }
+    document.getElementById('soBtn').style.display = 'block';
+    sf_toast('Welcome, ' + (u.displayName||'Student').split(' ')[0] + '! All tools are free 🎓');
+  } else {
+    document.getElementById('gate').classList.remove('gone');
+    document.getElementById('uname').style.display = 'none';
+    document.getElementById('uav').style.display = 'none';
+    document.getElementById('soBtn').style.display = 'none';
+  }
+};
+
+window._sfToast = (m, e) => sf_toast(m, e);
+
+// ── TOOL META ─────────────────────────────────────
+// ── TOOL META ─────────────────────────────────────
+const TM = {
+  notes:   {title:'Notes Maker',    ico:'📝', bg:'rgba(34,197,94,0.15)'},
+  quiz:    {title:'Quiz Generator', ico:'🎯', bg:'rgba(99,102,241,0.15)'},
+  mindmap: {title:'Mind Map',       ico:'🧠', bg:'rgba(168,85,247,0.15)'},
+  explain: {title:'Topic Explainer',ico:'💡', bg:'rgba(34,211,238,0.15)'},
+  flash:   {title:'Flashcards',     ico:'⚡', bg:'rgba(245,158,11,0.15)'},
+  essay:   {title:'Essay Writer',   ico:'✍️', bg:'rgba(236,72,153,0.15)'},
+};
+
+// ── OPEN/CLOSE TOOL ───────────────────────────────
+function openTool(t) {
+  if (!user) { sf_toast('Click Start Free to begin!', true); document.getElementById('gate').classList.remove('gone'); return; }
+  tool = t; uploads = [];
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`[data-t="${t}"]`)?.classList.add('active');
+  const m=TM[t];
+  document.getElementById('wsIco').style.background=m.bg;
+  document.getElementById('wsIco').textContent=m.ico;
+  document.getElementById('wsTtl').textContent=m.title;
+  // inject upload zones
+  ['notes','quiz','explain','flash'].forEach(k=>{
+    const el=document.getElementById('up-'+k);
+    if(el && k===t) el.innerHTML=buildUpZone(t);
+    else if(el) el.innerHTML='';
+  });
+  showForm();
+  const ws=document.getElementById('wsWrap');
+  ws.classList.add('open');
+  setTimeout(()=>ws.scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+function closeTool() {
+  document.getElementById('wsWrap').classList.remove('open');
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  tool=null; uploads=[];
+}
+
+function showForm() {
+  Object.keys(TM).forEach(k=>{const f=document.getElementById('f-'+k); if(f)f.style.display=k===tool?'block':'none';});
+  document.getElementById('wsLoad').classList.remove('show');
+  document.getElementById('wsOut').classList.remove('show');
+  if(ldInterval){clearInterval(ldInterval);ldInterval=null;}
+}
+
+// ── UPLOAD ────────────────────────────────────────
+function buildUpZone(t) {
+  return `<div class="up-row">
+    <button class="upbtn" onclick="doUpload('${t}')">📁 Upload file or image</button>
+    <button class="upbtn" onclick="doCamera('${t}')">📷 Take photo with camera</button>
+  </div><div class="file-prev" id="prev-${t}"></div>`;
+}
+function doUpload(t){const fi=document.getElementById('fi');fi.onchange=e=>handleUp(e.target.files,t);fi.click();}
+function doCamera(t){const ci=document.getElementById('ci');ci.onchange=e=>handleUp(e.target.files,t);ci.click();}
+
+async function handleUp(files,t){
+  for(const f of files){
+    if(f.size>40*1024*1024){sf_toast('Max file size is 40MB',true);continue;}
+    const isImg=f.type.startsWith('image/');
+    const b64=await f2b64(f);
+    uploads.push({base64:b64,media_type:f.type,name:f.name,isImg});
+    const prev=document.getElementById('prev-'+t);
+    if(!prev)continue;
+    const idx=uploads.length-1;
+    const d=document.createElement('div');d.className='fp-item';d.id='fpi'+idx;
+    if(isImg){const url=URL.createObjectURL(f);d.innerHTML=`<img src="${url}" alt="${f.name}"><div class="fp-name">${f.name}</div><button class="fp-rm" onclick="rmUp(${idx},'${t}')">✕</button>`;}
+    else{const ext=f.name.split('.').pop().toUpperCase();d.innerHTML=`<div class="fp-doc"><span>📄</span><small>${ext}</small></div><div class="fp-name">${f.name}</div><button class="fp-rm" onclick="rmUp(${idx},'${t}')">✕</button>`;}
+    prev.appendChild(d);
+  }
+  if(files.length)sf_toast(files.length+' file'+(files.length>1?'s':'')+' ready');
+}
+function rmUp(i,t){uploads.splice(i,1);const el=document.getElementById('fpi'+i);if(el)el.remove();}
+function f2b64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
+
+// ── MAIN GO ──────────────────────────────────────
+async function go(t) {
+  if (!user) {
+    sf_toast('Click Start Free first!', true);
+    document.getElementById('gate').classList.remove('gone');
+    return;
+  }
+  const inp = getInp(t);
+  const hasFiles = uploads.filter(u => u.isImg).length > 0;
+  if (!inp && !uploads.length) { sf_toast('Enter a topic or upload a file!', true); return; }
+
+  // hide all forms, show loading
+  Object.keys(TM).forEach(k => { const f = document.getElementById('f-'+k); if(f) f.style.display='none'; });
+  const ld = document.getElementById('wsLoad');
+  ld.classList.add('show');
+  document.getElementById('wsOut').classList.remove('show');
+
+  // animated progress
+  ldPct = 5;
+  document.getElementById('ldBar').style.width = '5%';
+  const msgs = {
+    notes:   ['Reading your topic...','Structuring notes...','Writing key points...','Adding examples...'],
+    quiz:    ['Analysing content...','Writing questions...','Building answer choices...','Adding explanations...'],
+    mindmap: ['Mapping the topic...','Building branches...','Connecting subtopics...','Finalising...'],
+    explain: ['Thinking about this...','Crafting explanation...','Finding analogies...','Almost there...'],
+    flash:   ['Finding key terms...','Writing card fronts...','Writing answers...','Packaging deck...'],
+    essay:   ['Planning structure...','Writing intro...','Developing arguments...','Writing conclusion...'],
+  };
+  const ms = msgs[t] || ['Thinking...'];
+  let mi = 0;
+  document.getElementById('ldTxt').textContent = ms[0];
+  if (ldInterval) clearInterval(ldInterval);
+  ldInterval = setInterval(() => {
+    mi = (mi + 1) % ms.length;
+    document.getElementById('ldTxt').textContent = ms[mi];
+    ldPct = Math.min(ldPct + 18, 88);
+    document.getElementById('ldBar').style.width = ldPct + '%';
+  }, 2200);
+
+  try {
+    const prompt  = buildPrompt(t, inp);
+    const images  = uploads.filter(u => u.isImg).map(u => ({ type: 'image', media_type: u.media_type, data: u.base64 }));
+
+    const resp = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, images: images.length ? images : undefined })
+    });
+
+    clearInterval(ldInterval); ldInterval = null;
+    document.getElementById('ldBar').style.width = '100%';
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(errData.error || 'Server returned ' + resp.status + '. Check your Claude API key in Vercel.');
+    }
+
+    const data = await resp.json();
+    const raw = (data.result || '').trim();
+
+    if (!raw) throw new Error('AI returned an empty response. Try again.');
+
+    ld.classList.remove('show');
+    lastOut = raw;
+    renderOut(t, raw);
+    uploads = [];
+
+  } catch(e) {
+    clearInterval(ldInterval); ldInterval = null;
+    ld.classList.remove('show');
+    showForm();
+    // Show a helpful error
+    const errBox = document.createElement('div');
+    errBox.style.cssText = 'background:rgba(239,68,68,0.1);border:1px solid var(--red);border-radius:12px;padding:16px;margin-top:14px;font-size:13px;color:var(--red);line-height:1.6;';
+    errBox.innerHTML = '<strong>Error:</strong> ' + e.message + '<br><br><span style="color:var(--tm)">Common fixes: Make sure CLAUDE_API_KEY is set in Vercel Environment Variables and the site has been redeployed.</span>';
+    // remove old error if any
+    const old = document.getElementById('errBox');
+    if (old) old.remove();
+    errBox.id = 'errBox';
+    const form = document.getElementById('f-' + t);
+    if (form) form.appendChild(errBox);
+    sf_toast(e.message.substring(0, 80), true);
+  }
+}
+
+function getInp(t) {
+  const m = { notes:'i-notes', quiz:'i-quiz', mindmap:'i-mindmap', explain:'i-explain', flash:'i-flash', essay:'i-essay' };
+  return (document.getElementById(m[t])?.value || '').trim();
+}
+
+// ── PROMPTS ───────────────────────────────────────
+function buildPrompt(t,inp){
+  const img=uploads.filter(u=>u.isImg).length>0;
+  const ic=img?'\n\nIMPORTANT: The student has uploaded an image. Carefully read all text, diagrams, and content from it. Use it as the primary source material. Combine with any text they provided.':'';
+
+  if(t==='notes'){
+    const d=document.getElementById('n-det').value,s=document.getElementById('n-sub').value;
+    const g={overview:'3–4 bullet points per section, key terms only, fast to read',standard:'clear paragraphs (3–5 sentences each) with definitions, key facts, and important points bolded',detailed:'thorough paragraphs with underlying mechanisms, causes and effects, examples, common misconceptions corrected, and real-world applications',ultra:'exhaustive academic-level coverage: every sub-topic, all relevant formulas with context, multiple worked examples, exam tips, memory aids, common student errors, links to related concepts, and real-world significance. Minimum 900 words.'};
+    return `You are an expert ${s} teacher writing premium revision notes for an exam student.${ic}
+
+Create ${d} study notes on: "${inp||'the uploaded content'}"
+
+OUTPUT ONLY THE NOTES — no preamble, no "Here are your notes", start directly:
+
+# ${inp||'Topic'}
+
+## Overview
+[2–3 sentence intro: what it is, why it matters, where it fits in the subject]
+
+## [Core Section 1 — most important aspect]
+[${g[d]}]
+
+## [Core Section 2]
+[${g[d]}]
+
+[Add as many sections as the topic requires]
+
+## Key Definitions
+**Term**: Precise definition (complete sentence)
+[Minimum 5 key terms, more for detailed/ultra]
+
+## Must-Know Facts & Formulas
+- [Specific testable fact or formula]
+[Minimum 6 bullet points]
+
+## Common Exam Questions
+- [Realistic exam question 1]?
+- [Realistic exam question 2]?
+- [Realistic exam question 3]?
+
+## Quick Revision — Remember This
+- [The single most important thing to remember]
+- [Second most important]
+- [Third]
+${d==='ultra'?'\n## Worked Example\n[Complete step-by-step worked example]\n\n## Common Mistakes Students Make\n- [Mistake 1 and how to avoid it]\n- [Mistake 2]\n\n## Connections to Other Topics\n[How this links to other parts of the syllabus]':''}
+
+Quality standard: A student should be able to pass an exam having read only these notes. **Bold** every key term. Be specific — no vague statements. Use real names, dates, formulas, and values.`;
+  }
+
+  if(t==='quiz'){
+    const n=document.getElementById('q-n').value,d=document.getElementById('q-d').value,s=document.getElementById('q-s').value;
+    return `You are an expert ${s} exam question setter creating a high-quality test.${ic}
+
+Create exactly ${n} MCQs at ${d} difficulty on: "${inp||'the uploaded content'}"
+
+CRITICAL: Return ONLY a JSON array. No markdown fences, no explanation text, nothing before or after the JSON:
+[{"question":"Complete question text ending with ?","options":["A: first option","B: second option","C: third option","D: fourth option"],"correct":0,"explanation":"Thorough 2–3 sentence explanation: why the correct answer is right AND specifically why each wrong option is incorrect. Be educational."}]
+
+Rules:
+- correct = 0-based index (0=A, 1=B, 2=C, 3=D)
+- ALL 4 options must be plausible — a knowledgeable student should have to think
+- Distribute correct answers: roughly equal A, B, C, D across the quiz
+- Mix question types: factual recall (30%), conceptual understanding (40%), application (30%)
+- ${s} style: use proper terminology, question structure and depth for that exam system
+- Hard = requires genuine understanding, not just memory
+- Explanations must be genuinely educational — teach something`;
+  }
+
+  if(t==='mindmap'){
+    const b=document.getElementById('mm-b').value,d=document.getElementById('mm-d').value;
+    return `Create a comprehensive, accurate mind map for "${inp}" with exactly ${b} main branches (${d} depth).
+
+Return ONLY this JSON — no markdown, no extra text:
+{"center":"${inp}","branches":[{"label":"2–3 word label","color":"#hexcolor","children":["specific subtopic","specific subtopic","specific subtopic","specific subtopic"]}]}
+
+Requirements:
+- Exactly ${b} branches, each covering a distinct major aspect of the topic
+- Children must be SPECIFIC (e.g. "Mitochondria" not just "Cell parts")
+- Colors: use DIFFERENT vivid hex colors for each branch — choose from: #818cf8,#22c55e,#f59e0b,#ec4899,#22d3ee,#ef4444,#a855f7,#84cc16,#f97316,#14b8a6
+- Branch labels: maximum 3 words
+- Cover the topic comprehensively and accurately
+- No two branches should overlap in content`;
+  }
+
+  if(t==='explain'){
+    const l=document.getElementById('e-l').value,s=document.getElementById('e-s').value;
+    const lm={child:'Use everyday words a 10-year-old knows. Short sentences. Zero jargon. Use stories, toys, or food analogies. Make it fun and memorable.',student:'Use clear academic language. Define every technical term when first used. Cover the what, why, and how thoroughly. Suitable for CBSE/JEE/GCSE level student.',advanced:'Use full technical vocabulary. Discuss underlying mechanisms, mathematical relationships, edge cases, research context, and nuance. Degree-level depth.'};
+    return `You are the most gifted teacher in the world. Your goal: give this student a genuine "aha moment" about "${inp||'the uploaded content'}".${ic}
+
+Level: ${lm[l]}
+Include: ${s==='analogy'?'2+ vivid real-world analogies that make the concept unforgettable':s==='example'?'2+ concrete worked examples showing the concept in action':s==='both'?'Both real-world analogies AND worked examples':' a clear, direct, complete explanation'}
+
+Format:
+## What is ${inp||'this concept'}?
+[Main explanation — accurate, complete, engaging]
+
+## Why does it matter?
+[Real-world relevance. Why should the student care? Where does this appear in real life?]
+${s!=='plain'?`\n## Real-World Analogy\n> [A vivid, memorable analogy that perfectly captures the concept. Make it surprising and sticky.]\n`:''}${s==='example'||s==='both'?`\n## Worked Example\n[Step-by-step concrete example. Show every step. Explain what's happening at each stage.]\n`:''}
+## The Core Insight
+[ONE sentence — the essential truth of this concept. The thing they should never forget.]
+
+## Quick Self-Check
+- [Question to test understanding 1]
+- [Question to test understanding 2]
+
+Standard: The student should finish this and think "I finally get it." Be accurate. Be clear. Be brilliant.`;
+  }
+
+  if(t==='flash'){
+    const n=document.getElementById('fl-n').value,ty=document.getElementById('fl-t').value;
+    const tm={'term-def':'Precise key term on front. Back: 2–3 sentence definition that fully explains the concept, includes an example, and says why it matters.','q-a':'Real exam-style question on front. Back: complete model answer with key points, any relevant formula or date, 3–4 sentences.','concept-ex':'Core principle or rule on front. Back: 1 concrete real-world example showing exactly how the principle works, 2–3 sentences.'};
+    return `Create ${n} premium revision flashcards for "${inp||'the uploaded content'}".${ic}
+Card style: ${tm[ty]}
+
+Return ONLY a JSON array — no markdown, no text before or after:
+[{"front":"concise, specific, clear front text","back":"genuinely educational back text — detailed enough to actually learn from. 2–4 sentences. Include specific values, names, dates, or formulas where relevant."}]
+
+Requirements:
+- Cover the ${n} most important and most exam-likely concepts
+- Fronts: specific and clear — never vague
+- Backs: educational and complete — reading it should feel like learning something real
+- Order: most fundamental → most advanced
+- No duplicates or near-duplicates`;
+  }
+
+  if(t==='essay'){
+    const w=document.getElementById('es-w').value,ty=document.getElementById('es-t').value,l=document.getElementById('es-l').value;
+    return `Write an excellent ${w}-word ${ty} essay at ${l} academic level on: "${inp}"
+
+This essay should be genuinely good — the kind a student gets marked highly for. That means:
+- Specific evidence: real names, dates, statistics, examples
+- Clear argument running through every paragraph
+- Sophisticated vocabulary appropriate for ${l} level
+- Each paragraph: topic sentence → evidence → analysis → link
+- No padding, no vague generalisations, no repetition
+
+Structure:
+
+# ${inp}
+
+## Introduction
+[Compelling hook that establishes stakes. Essential context. Clear, arguable thesis that previews your argument.]
+
+## [First Main Point — choose the most impactful heading]
+[Topic sentence. 2 specific pieces of evidence. Deep analysis. Link to thesis.]
+
+## [Second Main Point]
+[Topic sentence. 2 specific pieces of evidence. Deep analysis. Link to thesis.]
+${parseInt(w)>=600?'\n## [Third Main Point — or strongest counter-argument with rebuttal]\n[Topic sentence. Evidence. Analysis. Link.]\n':''}
+## Conclusion
+[Restate thesis in completely fresh language. Synthesise (don't just list) key arguments. Broader significance or thought-provoking final sentence.]
+
+Target: exactly ~${w} words. Every sentence must earn its place.`;
+  }
+}
+
+// ── SAFE JSON EXTRACTOR ──────────────────────────
+// Handles every way AI might wrap JSON: fences, extra text, etc.
+function safeJSON(raw) {
+  if (!raw) return null;
+  // 1. Direct parse
+  try { return JSON.parse(raw.trim()); } catch(_) {}
+  // 2. Strip ```json ... ``` fences
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) { try { return JSON.parse(fenced[1].trim()); } catch(_) {} }
+  // 3. Find first [...] array
+  const arrM = raw.match(/\[\s*\{[\s\S]*?\}\s*\]/);
+  if (arrM) { try { return JSON.parse(arrM[0]); } catch(_) {} }
+  // 4. Find first {...} object
+  const objM = raw.match(/\{[\s\S]*\}/);
+  if (objM) { try { return JSON.parse(objM[0]); } catch(_) {} }
+  // 5. Bracket-depth extraction from first [ or {
+  const ai = raw.indexOf('['), oi = raw.indexOf('{');
+  const si = ai === -1 ? oi : oi === -1 ? ai : Math.min(ai, oi);
+  if (si > -1) {
+    const sl = raw.slice(si);
+    const op = sl[0], cl = op === '[' ? ']' : '}';
+    let depth = 0, end = -1;
+    for (let i = 0; i < sl.length; i++) {
+      if (sl[i] === op) depth++;
+      else if (sl[i] === cl && --depth === 0) { end = i; break; }
+    }
+    if (end > -1) { try { return JSON.parse(sl.slice(0, end + 1)); } catch(_) {} }
+  }
+  return null;
+}
+
+// ── RENDER OUTPUT ─────────────────────────────────
+function renderOut(t, raw) {
+  const out = document.getElementById('wsOut');
+  out.classList.add('show');
+  const titles = { notes:'Your Notes', quiz:'Your Quiz', mindmap:'Mind Map', explain:'Explanation', flash:'Flashcards', essay:'Your Essay' };
+  document.getElementById('outTtl').textContent = titles[t] || 'Result';
+  const el = document.getElementById('outContent');
+  el.innerHTML = '';
+
+  // Prose tools — render as formatted HTML
+  if (['notes', 'explain', 'essay'].includes(t)) {
+    el.innerHTML = '<div class="prose">' + md2html(raw) + '</div>';
+    return;
+  }
+
+  // JSON tools — try to parse, show friendly fallback if it fails
+  const parsed = safeJSON(raw);
+
+  if (t === 'quiz') {
+    if (parsed && Array.isArray(parsed) && parsed.length && parsed[0].question) {
+      qData = parsed; qAns = {}; qDone = 0;
+      rQuiz(el);
+    } else {
+      el.innerHTML = '<div class="prose">'
+        + '<p style="color:var(--amber);font-weight:700;padding:12px;background:rgba(245,158,11,0.1);border-radius:10px;margin-bottom:16px">⚠ Could not parse as quiz — showing raw text. Try a more specific topic.</p>'
+        + md2html(raw) + '</div>';
+    }
+  } else if (t === 'mindmap') {
+    if (parsed && parsed.center && Array.isArray(parsed.branches) && parsed.branches.length) {
+      rMM(el, parsed);
+    } else {
+      el.innerHTML = '<div class="prose">'
+        + '<p style="color:var(--amber);font-weight:700;padding:12px;background:rgba(245,158,11,0.1);border-radius:10px;margin-bottom:16px">⚠ Mind map could not render — showing as text. Try again with a simpler topic.</p>'
+        + md2html(raw) + '</div>';
+    }
+  } else if (t === 'flash') {
+    if (parsed && Array.isArray(parsed) && parsed.length && parsed[0].front) {
+      rFlash(el, parsed);
+    } else {
+      el.innerHTML = '<div class="prose">'
+        + '<p style="color:var(--amber);font-weight:700;padding:12px;background:rgba(245,158,11,0.1);border-radius:10px;margin-bottom:16px">⚠ Could not parse flashcards — showing raw text. Try again.</p>'
+        + md2html(raw) + '</div>';
+    }
+  }
+}
+
+function md2html(s){
+  return s
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/^[-•] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,m=>`<ul>${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .split('\n\n').map(p=>p.trim().startsWith('<')?p:`<p>${p}</p>`).join('');
+}
+
+// QUIZ RENDER
+function rQuiz(el){
+  const L=['A','B','C','D'];
+  el.innerHTML=`<div class="qscore" id="qsc"><div><div class="sbig" id="sbig">—</div></div><div class="qscore-right"><div class="qscore-msg" id="smsg">Answer all questions to see your score</div><div class="qscore-sub" id="ssub">0 of ${qData.length} answered</div><div class="strack"><div class="sfill" id="sfill" style="width:0%"></div></div></div></div>`
+    +qData.map((q,i)=>`<div class="qcard"><div class="qnum">Question ${i+1} of ${qData.length}</div><div class="qtxt">${q.question}</div><ul class="olist">${q.options.map((o,j)=>`<li><button class="ob" id="ob${i}_${j}" onclick="pQ(${i},${j})"><span class="ol">${L[j]}</span>${o}</button></li>`).join('')}</ul><div class="qexp" id="ex${i}">${q.explanation}</div></div>`).join('');
+}
+function pQ(qi,oi){
+  if(qAns[qi]!==undefined)return;
+  qAns[qi]=oi;qDone++;
+  const cor=qData[qi].correct;
+  qData[qi].options.forEach((_,j)=>{const b=document.getElementById(`ob${qi}_${j}`);b.disabled=true;if(j===cor)b.classList.add('ok');if(j===oi&&oi!==cor)b.classList.add('no');});
+  document.getElementById(`ex${qi}`).classList.add('show');
+  document.getElementById('ssub').textContent=`${qDone} of ${qData.length} answered`;
+  if(qDone===qData.length){
+    const c=Object.keys(qAns).filter(i=>qAns[i]===qData[i].correct).length;
+    const pct=Math.round(c/qData.length*100);
+    const sc=document.getElementById('qsc');sc.classList.add('show');
+    document.getElementById('sbig').textContent=pct+'%';
+    document.getElementById('sbig').style.color=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+    document.getElementById('smsg').textContent=pct>=80?'Excellent work! 🎉':pct>=60?'Good effort! Keep going 💪':'Keep practising! You\'ve got this 📚';
+    document.getElementById('ssub').textContent=`${c} correct out of ${qData.length}`;
+    const f=document.getElementById('sfill');
+    f.style.background=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+    setTimeout(()=>f.style.width=pct+'%',50);
+    sc.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+// MINDMAP RENDER
+function rMM(el,mm){
+  const W=840,H=560,cx=W/2,cy=H/2,r=120,br=mm.branches||[],n=br.length;
+  let p='',nd='';
+  br.forEach((b,i)=>{
+    const ang=(2*Math.PI*i/n)-Math.PI/2,bx=cx+r*Math.cos(ang),by=cy+r*Math.sin(ang),col=b.color||'#818cf8';
+    p+=`<line x1="${cx}" y1="${cy}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="2.5" opacity="0.4"/>`;
+    (b.children||[]).forEach((ch,j)=>{
+      const sp=0.4,ca=ang+(j-(b.children.length-1)/2)*sp,cr2=r+100,chx=cx+cr2*Math.cos(ca),chy=cy+cr2*Math.sin(ca);
+      p+=`<line x1="${bx}" y1="${by}" x2="${chx}" y2="${chy}" stroke="${col}" stroke-width="1.5" opacity="0.25"/>`;
+      const ws=ch.split(' ');const ls=[];let c='';
+      ws.forEach(w=>{if((c+' '+w).length>14&&c){ls.push(c);c=w;}else{c=(c?c+' ':'')+w;}});if(c)ls.push(c);
+      nd+=`<g><ellipse cx="${chx}" cy="${chy}" rx="${Math.min(58,ch.length*4+20)}" ry="16" fill="${col}18" stroke="${col}" stroke-width="1" opacity="0.65"/>`;
+      ls.forEach((ln,li)=>{nd+=`<text x="${chx}" y="${chy+(li-(ls.length-1)/2)*13+4}" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="${col}">${ln}</text>`;});
+      nd+=`</g>`;
+    });
+    const bws=b.label.split(' ');const bls=[];let bc='';
+    bws.forEach(w=>{if((bc+' '+w).length>11&&bc){bls.push(bc);bc=w;}else{bc=(bc?bc+' ':'')+w;}});if(bc)bls.push(bc);
+    nd+=`<g><ellipse cx="${bx}" cy="${by}" rx="56" ry="24" fill="${col}22" stroke="${col}" stroke-width="2"/>`;
+    bls.forEach((ln,li)=>{nd+=`<text x="${bx}" y="${by+(li-(bls.length-1)/2)*16+5}" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="12" font-weight="700" fill="${col}">${ln}</text>`;});
+    nd+=`</g>`;
+  });
+  el.innerHTML=`<div class="mm-wrap"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="max-width:100%;height:auto">${p}${nd}<ellipse cx="${cx}" cy="${cy}" rx="74" ry="33" fill="#6366f118" stroke="#818cf8" stroke-width="2.5"/><text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="13" font-weight="800" fill="#a5b4fc">${mm.center}</text></svg></div>`;
+}
+
+// FLASHCARDS RENDER
+function rFlash(el,cards){
+  let flipped=0;
+  el.innerHTML=`<div class="fc-intro"><span>Tap any card to reveal the answer</span><span class="fc-prog" id="fcprog">0 / ${cards.length} flipped</span></div><div class="fgrid">${cards.map((c,i)=>`<div class="fc" id="fc${i}" onclick="flipFC(${i},${cards.length})"><div class="fc-f">${c.front}</div><div class="fc-b">${c.back}</div><div class="fc-hint">Tap to reveal</div></div>`).join('')}</div>`;
+}
+function flipFC(i,total){
+  const c=document.getElementById('fc'+i);
+  c.classList.toggle('flp');
+  c.querySelector('.fc-hint').textContent=c.classList.contains('flp')?'Tap to flip back':'Tap to reveal';
+  const flipped=document.querySelectorAll('.fc.flp').length;
+  const prog=document.getElementById('fcprog');
+  if(prog)prog.textContent=flipped+' / '+total+' flipped';
+}
+
+// COPY
+function doCopy(){navigator.clipboard.writeText(lastOut).then(()=>sf_toast('Copied to clipboard! 📋')).catch(()=>sf_toast('Copy failed',true));}
+
+// TOAST
+function sf_toast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast showconst auth = getAuth(app);
 const gp   = new GoogleAuthProvider();
 
 window._sfSignIn  = async () => { try { const r = await signInWithPopup(auth, gp); window._sfOnUser(r.user); } catch(e) { window._sfToast('Sign in failed: '+e.message, true); } };
