@@ -13,7 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
 <!-- Firebase with real config -->
-<script type="module">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
@@ -49,58 +48,7 @@ window._sfSignOut = async () => {
   await auth.signOut();
   window._sfOnUser(null);
 };
-</script>;
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
-  authDomain: "studyforge-e153c.firebaseapp.com",
-  projectId: "studyforge-e153c",
-  storageBucket: "studyforge-e153c.firebasestorage.app",
-  messagingSenderId: "691717656909",
-  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
-};
-
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const gp   = new GoogleAuthProvider();
-
-window._sfSignIn = async () => {
-  try {
-    const r = await signInWithPopup(auth, gp);
-    window._sfOnUser({
-      displayName: r.user.displayName,
-      photoURL:    r.user.photoURL,
-      uid:         r.user.uid,
-      isGuest:     false
-    });
-  } catch(e) {
-    if (e.code === 'auth/cancelled-popup-request') return;
-    if (e.code === 'auth/popup-blocked') {
-      window._sfToast('Pop-up blocked! Allow pop-ups for this site then try again.', true);
-    } else if (e.code === 'auth/unauthorized-domain') {
-      window._sfToast('Add your site URL to Firebase Authorized Domains.', true);
-    } else {
-      window._sfToast('Sign in failed: ' + e.message, true);
-    }
-  }
-};
-
-window._sfSignOut = async () => {
-  await signOut(auth);
-  window._sfOnUser(null);
-};
-
-onAuthStateChanged(auth, u => {
-  if (u && window._sfOnUser) {
-    window._sfOnUser({ displayName: u.displayName, photoURL: u.photoURL, uid: u.uid, isGuest: false });
-  }
-});
-
-window._fbReady = true;
 </script>
-
 <!-- Google AdSense — replace with your publisher ID -->
 <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 
