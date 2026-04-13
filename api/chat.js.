@@ -31,7 +31,9 @@ export default async function handler(req, res) {
   content.push({ type: 'text', text: prompt });
  
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+   const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
