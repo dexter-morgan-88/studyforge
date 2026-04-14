@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4096,
         messages: [{ role: 'user', content }],
       }),
@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
       return res.status(r.status).json({ error: 'Claude error: ' + msg });
     }
 
-    raw = data?.content?.[0]?.text;
+    raw = data?.content?.map(c => c.text).join("\n") || null;
     if (!raw) return res.status(500).json({ error: 'Claude returned empty response' });
 
   } catch (e) {
