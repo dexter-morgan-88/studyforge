@@ -11,30 +11,1613 @@
 
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script>
-let images = [];
 
-// 📁 FILE UPLOAD HANDLER
-const fileInput = document.getElementById("fileInput");
+<!-- Firebase with real config -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-if (fileInput) {
-  fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    if (!file) return;
+const firebaseConfig = {
+  apiKey: "AIzaSyDpY2S_v7DU5dVyV01NeHUH9ndNAW5JsX8",
+  authDomain: "studyforge-e153c.firebaseapp.com",
+  projectId: "studyforge-e153c",
+  storageBucket: "studyforge-e153c.firebasestorage.app",
+  messagingSenderId: "691717656909",
+  appId: "1:691717656909:web:652e37ce9f8a0e6325a704"
+};
 
-    const reader = new FileReader();
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const gp   = new GoogleAuthProvider();
 
-    reader.onload = () => {
-      const base64 = reader.result.split(',')[1];
+window._sfSignIn = async () => {
+  try {
+    const r = await signInWithPopup(auth, gp);
+    window._sfOnUser({
+      displayName: r.user.displayName,
+      photoURL:    r.user.photoURL,
+      uid:         r.user.uid,
+      isGuest:     false
+    });
+  } catch(e) {
+    if (e.code === 'auth/cancelled-popup-request') return;
+    if (e.code === 'auth/popup-blocked') {
+      window._sfToast('Pop-up blocked! Allow pop-ups for this site then try again.', true);
+    } else if (e.code === 'auth/unauthorized-domain') {
+      window._sfToast('Add your site URL to Firebase Authorized Domains.', true);
+    } else {
+      window._sfToast('Sign in failed: ' + e.message, true);
+    }
+  }
+};
 
-      images = [{
-        type: "image",
-        data: base64,
-        media_type: file.type
-      }];
+window._sfSignOut = async () => {
+  await signOut(auth);
+  window._sfOnUser(null);
+};
 
-      console.log("✅ File ready");
+onAuthStateChanged(auth, u => {
+  if (u && window._sfOnUser) {
+    window._sfOnUser({ displayName: u.displayName, photoURL: u.photoURL, uid: u.uid, isGuest: false });
+  }
+});
+
+window._fbReady = true;
+</script>
+
+<!-- Google AdSense — replace with your publisher ID -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<style>
+:root {
+  --bg: #060610;
+  --s1: #0d0d1f;
+  --s2: #131328;
+  --s3: #1a1a35;
+  --s4: #22224a;
+  --b1: rgba(255,255,255,0.05);
+  --b2: rgba(255,255,255,0.09);
+  --b3: rgba(255,255,255,0.16);
+  --b4: rgba(255,255,255,0.25);
+  --a:  #6366f1;
+  --a2: #818cf8;
+  --a3: #a5b4fc;
+  --ag: rgba(99,102,241,0.12);
+  --ab: rgba(99,102,241,0.06);
+  --green:  #22c55e;
+  --teal:   #14b8a6;
+  --amber:  #f59e0b;
+  --red:    #ef4444;
+  --pink:   #ec4899;
+  --purple: #a855f7;
+  --cyan:   #22d3ee;
+  --orange: #f97316;
+  --t:  #f0f0ff;
+  --tm: #8888bb;
+  --td: #44446a;
+  --fh: 'Bricolage Grotesque', sans-serif;
+  --fb: 'Nunito', sans-serif;
+  --r: 12px; --rl: 18px; --rx: 24px;
+  --shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--t); font-family: var(--fb); min-height: 100vh; overflow-x: hidden; }
+
+/* grain */
+body::after { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events:none; z-index:998; }
+
+/* ambient */
+.amb { position:fixed; border-radius:50%; filter:blur(140px); pointer-events:none; z-index:0; animation: drift 20s ease-in-out infinite; }
+.amb1 { width:700px; height:700px; background:#4338ca; top:-300px; left:-250px; opacity:0.1; }
+.amb2 { width:600px; height:600px; background:#7e22ce; bottom:-200px; right:-200px; opacity:0.08; animation-delay:-10s; }
+.amb3 { width:400px; height:400px; background:#0e7490; top:35%; left:40%; opacity:0.06; animation-delay:-5s; }
+@keyframes drift { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-20px)} 66%{transform:translate(-20px,30px)} }
+
+/* ── AUTH GATE ── */
+#gate { position:fixed; inset:0; z-index:900; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:20px; }
+#gate.gone { display:none; }
+.gate-card { background:var(--s1); border:1px solid var(--b2); border-radius:var(--rx); padding:44px 36px 36px; max-width:420px; width:100%; text-align:center; position:relative; z-index:1; }
+.gate-logo { font-family:var(--fh); font-size:28px; font-weight:800; margin-bottom:4px; }
+.gate-logo em { font-style:normal; background:linear-gradient(135deg,#818cf8,#22d3ee); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.gate-tagline { font-size:13px; color:var(--tm); margin-bottom:28px; line-height:1.6; }
+.g-signin { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 20px; background:#fff; border:none; border-radius:var(--r); font-family:var(--fb); font-size:15px; font-weight:700; color:#1f1f1f; cursor:pointer; transition:all 0.2s; margin-bottom:18px; }
+.g-signin:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+.g-signin svg { width:20px; height:20px; flex-shrink:0; }
+.gate-feats { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:22px; text-align:left; }
+.gf { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tm); }
+.gf::before { content:'✓'; color:var(--green); font-weight:800; font-size:11px; }
+.gate-note { font-size:11px; color:var(--td); margin-top:16px; line-height:1.5; }
+.free-forever-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.25); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; color:var(--green); margin-bottom:16px; }
+
+/* ── NAV ── */
+nav { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:12px 28px; border-bottom:1px solid var(--b1); backdrop-filter:blur(28px); background:rgba(6,6,16,0.88); flex-wrap:wrap; gap:10px; }
+.nav-logo { font-family:var(--fh); font-size:19px; font-weight:800; display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--t); }
+.nav-logo .ico { width:30px; height:30px; background:linear-gradient(135deg,var(--a),var(--purple)); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.nav-logo em { font-style:normal; background:linear-gradient(90deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.navr { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.free-tag { display:flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); font-size:12px; font-weight:700; color:var(--green); }
+.free-tag .fdot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+.nbtn { padding:7px 15px; border-radius:20px; font-family:var(--fb); font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.2s; }
+.nbtn.solid { background:linear-gradient(135deg,var(--a),var(--purple)); color:#fff; }
+.nbtn.solid:hover { opacity:0.85; transform:translateY(-1px); }
+.nbtn.ghost { background:var(--s2); border:1px solid var(--b2); color:var(--tm); }
+.nbtn.ghost:hover { border-color:var(--b3); color:var(--t); }
+.uav { width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--a); display:none; }
+.uname { font-size:13px; color:var(--tm); display:none; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ── HERO ── */
+.hero { position:relative; z-index:10; max-width:900px; margin:0 auto; padding:72px 24px 56px; text-align:center; }
+.hero-pill { display:inline-flex; align-items:center; gap:8px; background:var(--ag); border:1px solid rgba(99,102,241,0.25); border-radius:20px; padding:6px 18px; font-size:12px; font-weight:600; color:var(--a2); margin-bottom:28px; letter-spacing:0.04em; }
+.hp-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+.hero h1 { font-family:var(--fh); font-size:clamp(38px,6vw,70px); font-weight:800; line-height:1.02; letter-spacing:-2.5px; margin-bottom:22px; }
+.h1-free { display:inline-block; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:12px; padding:0 14px; color:var(--green); font-size:0.6em; vertical-align:middle; margin-left:8px; letter-spacing:0; }
+.grad1 { background:linear-gradient(135deg,#818cf8,#22d3ee,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero p { font-size:17px; color:var(--tm); line-height:1.75; max-width:580px; margin:0 auto 32px; }
+.hero-stats { display:flex; align-items:center; justify-content:center; gap:28px; flex-wrap:wrap; margin-bottom:40px; }
+.hstat { text-align:center; }
+.hstat .hnum { font-family:var(--fh); font-size:24px; font-weight:800; background:linear-gradient(135deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hstat .hlbl { font-size:11px; color:var(--td); text-transform:uppercase; letter-spacing:0.08em; }
+.hdiv { width:1px; height:36px; background:var(--b2); }
+
+/* ad slot */
+.ad-slot { position:relative; z-index:10; max-width:900px; margin:0 auto 20px; padding:0 24px; text-align:center; }
+.ad-placeholder { background:var(--s1); border:1px dashed var(--b2); border-radius:var(--r); padding:20px; font-size:12px; color:var(--td); }
+
+/* ── TOOLS SECTION ── */
+.section { position:relative; z-index:10; max-width:1080px; margin:0 auto 60px; padding:0 20px; }
+.sec-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:8px; }
+.sec-title { font-family:var(--fh); font-size:22px; font-weight:800; }
+.sec-sub { font-size:13px; color:var(--tm); }
+
+.tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+
+.tc { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); overflow:hidden; cursor:pointer; transition:all 0.22s; position:relative; display:flex; flex-direction:column; }
+.tc:hover { transform:translateY(-3px); border-color:var(--b3); box-shadow:0 16px 48px rgba(0,0,0,0.4); }
+.tc.active { border-width:1.5px; }
+.tc[data-t="notes"].active  { border-color:rgba(34,197,94,0.6); }
+.tc[data-t="quiz"].active   { border-color:rgba(99,102,241,0.6); }
+.tc[data-t="mindmap"].active{ border-color:rgba(168,85,247,0.6); }
+.tc[data-t="explain"].active{ border-color:rgba(34,211,238,0.6); }
+.tc[data-t="flash"].active  { border-color:rgba(245,158,11,0.6); }
+.tc[data-t="essay"].active  { border-color:rgba(236,72,153,0.6); }
+
+.tc-top { padding:20px 20px 16px; flex:1; }
+.tc-bar { height:3px; width:100%; }
+.tc-bar-notes   { background:linear-gradient(90deg,#22c55e,#14b8a6); }
+.tc-bar-quiz    { background:linear-gradient(90deg,#6366f1,#818cf8); }
+.tc-bar-mindmap { background:linear-gradient(90deg,#a855f7,#ec4899); }
+.tc-bar-explain { background:linear-gradient(90deg,#22d3ee,#6366f1); }
+.tc-bar-flash   { background:linear-gradient(90deg,#f59e0b,#f97316); }
+.tc-bar-essay   { background:linear-gradient(90deg,#ec4899,#a855f7); }
+
+.tc-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:14px; }
+.ic-n{background:rgba(34,197,94,0.13);} .ic-q{background:rgba(99,102,241,0.13);}
+.ic-m{background:rgba(168,85,247,0.13);} .ic-e{background:rgba(34,211,238,0.13);}
+.ic-f{background:rgba(245,158,11,0.13);} .ic-w{background:rgba(236,72,153,0.13);}
+
+.tc h3 { font-family:var(--fh); font-size:16px; font-weight:700; margin-bottom:6px; }
+.tc p  { font-size:13px; color:var(--tm); line-height:1.6; }
+.tc-foot { padding:12px 20px; border-top:1px solid var(--b1); display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.15); }
+.ttag { font-size:10px; font-weight:800; padding:3px 9px; border-radius:6px; letter-spacing:0.06em; }
+.tag-free { background:rgba(34,197,94,0.12); color:var(--green); border:1px solid rgba(34,197,94,0.2); }
+.tc-arr { font-size:18px; color:var(--td); transition:all 0.2s; }
+.tc:hover .tc-arr { color:var(--t); transform:translate(3px,-3px); }
+
+/* ── WORKSPACE ── */
+.ws-wrap { position:relative; z-index:10; max-width:920px; margin:0 auto 80px; padding:0 20px; display:none; }
+.ws-wrap.open { display:block; animation:wsFadeUp 0.3s ease; }
+@keyframes wsFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.ws { background:var(--s1); border:1px solid var(--b2); border-radius:var(--rx); overflow:hidden; box-shadow:var(--shadow); }
+.wsh { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--b1); }
+.wshl { display:flex; align-items:center; gap:12px; }
+.ws-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.ws-ttl { font-family:var(--fh); font-size:17px; font-weight:800; }
+.ws-free-badge { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:3px 9px; font-size:10px; font-weight:700; color:var(--green); }
+.wscls { background:var(--s2); border:1px solid var(--b2); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--tm); font-size:16px; transition:all 0.15s; }
+.wscls:hover { color:var(--t); border-color:var(--b3); }
+.wbody { padding:24px; }
+
+/* form */
+.lbl { display:block; font-size:11px; font-weight:700; color:var(--td); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+textarea { width:100%; background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t); font-family:var(--fb); font-size:14px; line-height:1.7; padding:14px 16px; resize:vertical; min-height:110px; outline:none; transition:border-color 0.2s; }
+textarea:focus { border-color:var(--a); }
+textarea::placeholder { color:var(--td); }
+.r2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+.r3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px; }
+select { width:100%; background:var(--s2); border:1px solid var(--b2); border-radius:var(--r); color:var(--t); font-family:var(--fb); font-size:13px; padding:10px 13px; outline:none; cursor:pointer; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2344446a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s; }
+select:focus { border-color:var(--a); }
+select option { background:#131328; }
+
+/* upload */
+.up-row { display:flex; gap:8px; margin-top:14px; }
+.upbtn { flex:1; padding:11px 14px; border-radius:var(--r); border:1px solid var(--b2); background:var(--s2); color:var(--tm); font-family:var(--fb); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all 0.2s; }
+.upbtn:hover { border-color:var(--a); color:var(--a2); background:var(--ab); }
+.file-prev { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.fp-item { position:relative; }
+.fp-item img { width:72px; height:72px; object-fit:cover; border-radius:9px; border:1px solid var(--b2); display:block; }
+.fp-doc { width:72px; height:72px; background:var(--s3); border-radius:9px; border:1px solid var(--b2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.fp-doc span { font-size:20px; }
+.fp-doc small { font-size:9px; color:var(--tm); text-transform:uppercase; font-weight:700; }
+.fp-name { font-size:9px; color:var(--tm); max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:3px; }
+.fp-rm { position:absolute; top:-5px; right:-5px; background:var(--red); color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+
+/* go btn */
+.gbtn { width:100%; margin-top:18px; padding:14px; background:linear-gradient(135deg,var(--a),var(--purple)); border:none; border-radius:var(--r); color:#fff; font-family:var(--fh); font-size:16px; font-weight:800; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:0.01em; }
+.gbtn:hover { opacity:0.88; transform:translateY(-1px); box-shadow:0 8px 32px rgba(99,102,241,0.35); }
+.gbtn:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* loading */
+.ws-load { display:none; text-align:center; padding:52px 24px; }
+.ws-load.show { display:block; }
+.spinner { display:inline-block; width:48px; height:48px; border:3px solid var(--b2); border-top-color:var(--a); border-radius:50%; animation:spin 0.7s linear infinite; margin-bottom:18px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.ws-load h3 { font-family:var(--fh); font-size:17px; font-weight:700; margin-bottom:6px; }
+.ws-load p { font-size:13px; color:var(--tm); }
+.load-bar { width:200px; height:3px; background:var(--s3); border-radius:3px; margin:16px auto 0; overflow:hidden; }
+.load-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--a),var(--purple)); border-radius:3px; transition:width 0.4s ease; }
+
+/* output */
+.ws-out { display:none; }
+.ws-out.show { display:block; }
+.out-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.out-bar h3 { font-family:var(--fh); font-size:16px; font-weight:800; }
+.out-acts { display:flex; gap:7px; }
+.oab { padding:7px 14px; border-radius:9px; font-family:var(--fb); font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--b2); background:var(--s2); color:var(--tm); transition:all 0.15s; }
+.oab:hover { border-color:var(--b3); color:var(--t); }
+.oab.pri { background:var(--ab); border-color:rgba(99,102,241,0.3); color:var(--a2); }
+
+/* prose */
+.prose { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:26px; line-height:1.82; }
+.prose h1 { font-family:var(--fh); font-size:23px; font-weight:800; margin-bottom:10px; color:var(--t); }
+.prose h2 { font-family:var(--fh); font-size:18px; font-weight:700; margin:24px 0 10px; color:var(--a2); border-bottom:1px solid var(--b1); padding-bottom:6px; }
+.prose h3 { font-family:var(--fh); font-size:15px; font-weight:700; margin:16px 0 7px; color:var(--cyan); }
+.prose p  { font-size:14px; color:var(--tm); margin-bottom:12px; line-height:1.8; }
+.prose ul,.prose ol { margin:8px 0 14px 22px; }
+.prose li { font-size:14px; color:var(--tm); margin-bottom:7px; line-height:1.7; }
+.prose strong { color:var(--t); font-weight:700; }
+.prose em { color:var(--a3); font-style:italic; }
+.prose blockquote { border-left:3px solid var(--cyan); padding:12px 18px; background:rgba(34,211,238,0.06); border-radius:0 10px 10px 0; margin:14px 0; color:var(--t); font-style:italic; font-size:14px; }
+.prose code { background:var(--s3); padding:2px 7px; border-radius:5px; font-family:monospace; font-size:12px; color:var(--a3); }
+.prose table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
+.prose th { background:var(--s3); padding:9px 13px; text-align:left; font-weight:700; border:1px solid var(--b2); color:var(--t); }
+.prose td { padding:9px 13px; border:1px solid var(--b1); color:var(--tm); }
+.prose hr { border:none; border-top:1px solid var(--b1); margin:18px 0; }
+
+/* quiz */
+.qscore { display:none; background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:18px 22px; margin-bottom:16px; align-items:center; gap:18px; }
+.qscore.show { display:flex; }
+.sbig { font-family:var(--fh); font-size:36px; font-weight:800; }
+.qscore-right { flex:1; }
+.qscore-msg { font-family:var(--fh); font-size:15px; font-weight:700; margin-bottom:4px; }
+.qscore-sub { font-size:12px; color:var(--tm); margin-bottom:8px; }
+.strack { height:6px; background:var(--s3); border-radius:6px; overflow:hidden; }
+.sfill  { height:100%; border-radius:6px; transition:width 1.2s ease; }
+.qcard { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:22px; margin-bottom:13px; }
+.qnum  { font-size:10px; font-weight:800; color:var(--a2); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+.qtxt  { font-size:15px; font-weight:600; line-height:1.55; margin-bottom:16px; }
+.olist { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.ob { width:100%; text-align:left; padding:11px 16px; background:var(--s1); border:1px solid var(--b2); border-radius:11px; color:var(--t); font-family:var(--fb); font-size:13px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:11px; }
+.ob:hover:not(:disabled) { border-color:var(--a); background:var(--ag); }
+.ol { width:24px; height:24px; border-radius:7px; background:var(--s3); border:1px solid var(--b2); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--tm); transition:all 0.15s; }
+.ob:hover:not(:disabled) .ol { background:var(--a); color:#fff; border-color:var(--a); }
+.ob.ok { background:rgba(34,197,94,0.1); border-color:var(--green); color:var(--green); }
+.ob.ok .ol { background:var(--green); color:#000; border-color:var(--green); }
+.ob.no { background:rgba(239,68,68,0.1); border-color:var(--red); color:var(--red); }
+.ob.no .ol { background:var(--red); color:#fff; border-color:var(--red); }
+.ob:disabled { cursor:default; }
+.qexp { display:none; margin-top:12px; padding:12px 16px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:10px; font-size:13px; color:var(--a3); line-height:1.65; }
+.qexp.show { display:block; }
+
+/* flashcards */
+.fc-intro { font-size:12px; color:var(--td); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.fc-prog { font-size:12px; color:var(--tm); }
+.fgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:13px; }
+.fc { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:20px; cursor:pointer; transition:all 0.25s; min-height:130px; display:flex; flex-direction:column; justify-content:space-between; }
+.fc:hover { border-color:var(--b3); transform:translateY(-2px); }
+.fc.flp { background:var(--s3); border-color:var(--a2); }
+.fc-f { font-size:14px; font-weight:600; line-height:1.5; }
+.fc-b { display:none; font-size:13px; color:var(--a3); line-height:1.65; }
+.fc.flp .fc-f { display:none; }
+.fc.flp .fc-b { display:block; }
+.fc-hint { font-size:10px; color:var(--td); margin-top:10px; display:flex; align-items:center; gap:4px; }
+.fc-hint::before { content:'↩'; font-size:11px; }
+
+/* mindmap */
+.mm-wrap { background:var(--s2); border:1px solid var(--b1); border-radius:var(--rl); padding:20px; overflow-x:auto; }
+.mm-wrap svg { display:block; margin:0 auto; }
+
+/* ── ABOUT / INFO SECTION ── */
+.about-section { position:relative; z-index:10; max-width:1080px; margin:0 auto 80px; padding:0 20px; }
+.about-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:48px; align-items:center; }
+.about-text h2 { font-family:var(--fh); font-size:30px; font-weight:800; line-height:1.2; margin-bottom:16px; letter-spacing:-0.5px; }
+.about-text p { font-size:15px; color:var(--tm); line-height:1.8; margin-bottom:14px; }
+.about-text .highlight { color:var(--green); font-weight:700; }
+.about-cards { display:flex; flex-direction:column; gap:12px; }
+.about-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
+.about-card-ico { font-size:22px; flex-shrink:0; margin-top:2px; }
+.about-card h4 { font-family:var(--fh); font-size:14px; font-weight:700; margin-bottom:4px; }
+.about-card p { font-size:12px; color:var(--tm); line-height:1.6; margin:0; }
+
+/* ── MISSION STRIP ── */
+.mission { position:relative; z-index:10; background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(168,85,247,0.06)); border:1px solid rgba(99,102,241,0.15); border-radius:var(--rx); max-width:1080px; margin:0 auto 80px; padding:44px 48px; text-align:center; }
+.mission h2 { font-family:var(--fh); font-size:28px; font-weight:800; margin-bottom:12px; }
+.mission p { font-size:15px; color:var(--tm); line-height:1.8; max-width:620px; margin:0 auto 24px; }
+.mission-pills { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.mp { display:inline-flex; align-items:center; gap:6px; background:var(--s2); border:1px solid var(--b2); border-radius:20px; padding:7px 16px; font-size:13px; color:var(--tm); font-weight:600; }
+.mp::before { content:'✓'; color:var(--green); font-weight:800; }
+
+/* ── HOW IT WORKS ── */
+.hiw { position:relative; z-index:10; max-width:1080px; margin:0 auto 80px; padding:0 20px; }
+.hiw-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; margin-top:24px; }
+.hiw-card { background:var(--s1); border:1px solid var(--b1); border-radius:var(--rl); padding:24px; position:relative; overflow:hidden; }
+.hiw-num { font-family:var(--fh); font-size:56px; font-weight:900; color:rgba(99,102,241,0.08); position:absolute; top:10px; right:16px; line-height:1; }
+.hiw-ico { font-size:28px; margin-bottom:14px; }
+.hiw-card h4 { font-family:var(--fh); font-size:16px; font-weight:700; margin-bottom:7px; }
+.hiw-card p { font-size:13px; color:var(--tm); line-height:1.65; }
+
+/* ── FOOTER ── */
+footer { position:relative; z-index:10; border-top:1px solid var(--b1); margin-top:20px; }
+.footer-main { max-width:1080px; margin:0 auto; padding:48px 24px 32px; display:grid; grid-template-columns:2fr 1fr 1fr; gap:48px; }
+.footer-brand .fl { font-family:var(--fh); font-size:20px; font-weight:800; margin-bottom:10px; }
+.footer-brand .fl em { font-style:normal; background:linear-gradient(90deg,var(--a2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.footer-brand p { font-size:13px; color:var(--tm); line-height:1.7; max-width:280px; margin-bottom:14px; }
+.footer-free-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; color:var(--green); }
+.footer-col h5 { font-family:var(--fh); font-size:13px; font-weight:700; color:var(--t); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.08em; }
+.footer-col a { display:block; font-size:13px; color:var(--tm); text-decoration:none; margin-bottom:9px; transition:color 0.15s; }
+.footer-col a:hover { color:var(--t); }
+.footer-bottom { border-top:1px solid var(--b1); padding:16px 24px; max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.footer-bottom p { font-size:12px; color:var(--td); }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--s1); border:1px solid var(--green); border-radius:13px; padding:12px 24px; font-size:13px; color:var(--green); font-weight:700; z-index:800; opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.err { border-color:var(--red); color:var(--red); }
+
+/* hidden inputs */
+#fi,#ci { display:none; }
+
+@media(max-width:768px) {
+  nav { padding:12px 16px; }
+  .hero { padding:48px 16px 40px; }
+  .about-grid { grid-template-columns:1fr; gap:28px; }
+  .footer-main { grid-template-columns:1fr; gap:28px; }
+  .tools-grid { grid-template-columns:1fr; }
+  .r2,.r3 { grid-template-columns:1fr; }
+  .mission { padding:28px 20px; margin:0 20px 60px; }
+  .wbody { padding:16px; }
+  .up-row { flex-direction:column; }
+  .hiw-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:480px) {
+  .hiw-grid { grid-template-columns:1fr; }
+  .hero h1 { letter-spacing:-1.5px; }
+  .footer-main { padding:32px 16px 24px; }
+}
+</style>
+</head>
+<body>
+<div class="amb amb1"></div><div class="amb amb2"></div><div class="amb amb3"></div>
+<input type="file" id="fi" accept="image/*,.pdf,.txt,.doc,.docx" multiple>
+<input type="file" id="ci" accept="image/*" capture="environment">
+
+<!-- ═══ GATE ═══ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="free-forever-badge">🎓 100% Free Forever</div>
+    <div class="gate-logo">Study<em>Forge</em> AI</div>
+    <p class="gate-tagline">The most powerful free AI study platform.<br>No payment. No limits. Just learning.</p>
+
+    <!-- Google Sign In -->
+    <button class="g-signin" id="gSignInBtn" onclick="doGoogleSignIn()">
+      <svg viewBox="0 0 24 24" width="20" height="20" style="flex-shrink:0">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
+      <div style="flex:1;height:1px;background:var(--b2)"></div>
+      <span style="font-size:12px;color:var(--td)">or</span>
+      <div style="flex:1;height:1px;background:var(--b2)"></div>
+    </div>
+
+    <!-- Guest option -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="guestName" type="text" placeholder="Enter your name (optional)" maxlength="30"
+        style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);color:var(--t);font-family:var(--fb);font-size:14px;padding:11px 14px;outline:none;transition:border-color 0.2s;"
+        onkeydown="if(event.key==='Enter')startGuest()"
+        onfocus="this.style.borderColor='var(--a)'" onblur="this.style.borderColor='var(--b2)'">
+      <button onclick="startGuest()"
+        style="padding:11px 20px;background:linear-gradient(135deg,var(--a),var(--purple));border:none;border-radius:var(--r);color:#fff;font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;"
+        onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        Start Free →
+      </button>
+    </div>
+    <p style="font-size:11px;color:var(--td);margin-bottom:0;text-align:center;">No email or password needed. Just click Start Free.</p>
+
+    <div class="gate-feats" style="margin-top:20px;">
+      <div class="gf">All 6 AI tools</div>
+      <div class="gf">Unlimited uses</div>
+      <div class="gf">Upload photos & files</div>
+      <div class="gf">Camera capture</div>
+      <div class="gf">JEE · NEET · CBSE</div>
+      <div class="gf">SAT · GCSE · IB</div>
+      <div class="gf">Works on any device</div>
+      <div class="gf">100% Free forever</div>
+    </div>
+    <p class="gate-note" style="margin-top:16px;">No payment. No spam. No data selling.<br>Built by a student, for students 🇮🇳</p>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a class="nav-logo" href="#"><div class="ico">⚡</div>Study<em>Forge</em> AI</a>
+  <div class="navr">
+    <div class="free-tag"><div class="fdot"></div>Free Forever</div>
+    <span class="uname" id="uname"></span>
+    <img class="uav" id="uav" src="" alt="avatar">
+    <button class="nbtn ghost" id="soBtn" onclick="signOut()" style="display:none">Sign out</button>
+    <a href="#tools" class="nbtn solid">Open Tools ↓</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-pill"><div class="hp-dot"></div>Completely Free · No Sign-up Fee · No Premium Plans</div>
+  <h1>The AI study tool<br><span class="grad1">every student deserves</span><span class="h1-free">FREE</span></h1>
+  <p>Notes, quizzes, mind maps, flashcards, topic explainers and essays — all powered by advanced AI. Upload a photo of your textbook page and get instant study material.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hnum">6</div><div class="hlbl">AI Tools</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">∞</div><div class="hlbl">Unlimited Uses</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">₹0</div><div class="hlbl">Forever Free</div></div>
+    <div class="hdiv"></div>
+    <div class="hstat"><div class="hnum">40MB</div><div class="hlbl">File Upload</div></div>
+  </div>
+</div>
+
+<!-- Ad Slot (top) -->
+<div class="ad-slot">
+  <!-- Replace this with your actual AdSense code after approval -->
+  <div class="ad-placeholder">📢 Advertisement — This keeps StudyForge free for everyone</div>
+</div>
+
+<!-- ═══ TOOLS ═══ -->
+<div class="section" id="tools">
+  <div class="sec-head">
+    <div class="sec-title">All tools — all free, always</div>
+    <div class="sec-sub">Upload a photo or file to use with any tool</div>
+  </div>
+  <div class="tools-grid">
+    <div class="tc" data-t="notes" onclick="openTool('notes')">
+      <div class="tc-bar tc-bar-notes"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-n">📝</div>
+        <h3>Detailed Notes Maker</h3>
+        <p>Exam-ready structured notes on any topic. 4 depth levels from quick overview to ultra-comprehensive. Upload a textbook page photo for instant digital notes.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="quiz" onclick="openTool('quiz')">
+      <div class="tc-bar tc-bar-quiz"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-q">🎯</div>
+        <h3>AI Quiz Generator</h3>
+        <p>Full MCQ tests with live scoring and detailed explanations for every answer. Supports JEE, NEET, CBSE, SAT, GCSE, IB. Upload notes to quiz from them directly.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="mindmap" onclick="openTool('mindmap')">
+      <div class="tc-bar tc-bar-mindmap"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-m">🧠</div>
+        <h3>Revision Mind Map</h3>
+        <p>Visual branching mind maps of any topic or subject. See the whole syllabus connected at a glance. Perfect for the night before an exam.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="explain" onclick="openTool('explain')">
+      <div class="tc-bar tc-bar-explain"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-e">💡</div>
+        <h3>Topic Explainer</h3>
+        <p>Any concept explained with crystal clarity. Choose "like I'm 10", student mode, or full advanced depth. Upload a confusing page and get it made simple instantly.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="flash" onclick="openTool('flash')">
+      <div class="tc-bar tc-bar-flash"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-f">⚡</div>
+        <h3>Flashcard Generator</h3>
+        <p>Instant tap-to-flip revision card decks. Upload a chapter page and get a full deck made from it. Great for spaced repetition and last-minute cramming.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+    <div class="tc" data-t="essay" onclick="openTool('essay')">
+      <div class="tc-bar tc-bar-essay"></div>
+      <div class="tc-top">
+        <div class="tc-icon ic-w">✍️</div>
+        <h3>Essay & Assignment Writer</h3>
+        <p>Properly structured, argued essays from school to university level. Argumentative, analytical, descriptive or comparative. Every paragraph earns its place.</p>
+      </div>
+      <div class="tc-foot"><span class="ttag tag-free">FREE FOREVER</span><span class="tc-arr">↗</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKSPACE ═══ -->
+<div class="ws-wrap" id="wsWrap">
+<div class="ws">
+  <div class="wsh">
+    <div class="wshl">
+      <div class="ws-ico" id="wsIco"></div>
+      <div class="ws-ttl" id="wsTtl">Tool</div>
+      <span class="ws-free-badge">FREE</span>
+    </div>
+    <div class="wscls" onclick="closeTool()">✕</div>
+  </div>
+  <div class="wbody">
+
+    <!-- NOTES FORM -->
+    <div id="f-notes" style="display:none">
+      <span class="lbl">Topic — or upload a photo/file of your textbook/notes below</span>
+      <textarea id="i-notes" placeholder="e.g. Photosynthesis, Newton's Laws, Organic Chemistry, The French Revolution...&#10;&#10;Or leave this blank and upload a photo of your textbook page — AI will read it."></textarea>
+      <div class="r2">
+        <div><span class="lbl">Detail level</span>
+          <select id="n-det">
+            <option value="overview">Overview — 5 min quick revision</option>
+            <option value="standard" selected>Standard — full exam prep</option>
+            <option value="detailed">Detailed — deep understanding</option>
+            <option value="ultra">Ultra — cover absolutely everything</option>
+          </select>
+        </div>
+        <div><span class="lbl">Subject area</span>
+          <select id="n-sub">
+            <option value="any">General / Any subject</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
+            <option value="maths">Mathematics</option>
+            <option value="history">History / Social Studies</option>
+            <option value="geography">Geography</option>
+            <option value="english">English / Literature</option>
+            <option value="economics">Economics / Business</option>
+            <option value="cs">Computer Science</option>
+            <option value="hindi">Hindi</option>
+          </select>
+        </div>
+      </div>
+      <div id="up-notes"></div>
+      <button class="gbtn" onclick="go('notes')">📝 Generate Detailed Notes</button>
+    </div>
+
+    <!-- QUIZ FORM -->
+    <div id="f-quiz" style="display:none">
+      <span class="lbl">Topic or paste your notes</span>
+      <textarea id="i-quiz" placeholder="Enter a topic like 'Electromagnetic Induction' or paste your own notes here...&#10;Or upload a photo of your notes below."></textarea>
+      <div class="r3">
+        <div><span class="lbl">Questions</span>
+          <select id="q-n"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select>
+        </div>
+        <div><span class="lbl">Difficulty</span>
+          <select id="q-d"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option><option value="mixed">Mixed</option></select>
+        </div>
+        <div><span class="lbl">Exam style</span>
+          <select id="q-s"><option value="general">General</option><option value="JEE/NEET">JEE/NEET</option><option value="CBSE/ICSE">CBSE/ICSE</option><option value="SAT/ACT">SAT/ACT</option><option value="GCSE/A-Level">GCSE/A-Level</option><option value="IB">IB</option></select>
+        </div>
+      </div>
+      <div id="up-quiz"></div>
+      <button class="gbtn" onclick="go('quiz')">🎯 Generate Quiz</button>
+    </div>
+
+    <!-- MINDMAP FORM -->
+    <div id="f-mindmap" style="display:none">
+      <span class="lbl">Topic for mind map</span>
+      <textarea id="i-mindmap" placeholder="e.g. World War II, Cell Division, Calculus, Climate Change, Indian History..." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Number of branches</span>
+          <select id="mm-b"><option value="5">5 branches</option><option value="7" selected>7 branches</option><option value="8">8 branches</option></select>
+        </div>
+        <div><span class="lbl">Detail depth</span>
+          <select id="mm-d"><option value="shallow">Shallow</option><option value="medium" selected>Medium</option><option value="deep">Deep</option></select>
+        </div>
+      </div>
+      <button class="gbtn" onclick="go('mindmap')">🧠 Generate Mind Map</button>
+    </div>
+
+    <!-- EXPLAIN FORM -->
+    <div id="f-explain" style="display:none">
+      <span class="lbl">What do you want explained?</span>
+      <textarea id="i-explain" placeholder="e.g. Quantum entanglement, Supply and demand, DNA replication, Integration by parts...&#10;Or upload a confusing textbook page below." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Explanation level</span>
+          <select id="e-l"><option value="child">Like I'm 10 years old</option><option value="student" selected>Student — clear & thorough</option><option value="advanced">Advanced — full technical depth</option></select>
+        </div>
+        <div><span class="lbl">Style</span>
+          <select id="e-s"><option value="analogy">Real-world analogies</option><option value="example" selected>Worked examples</option><option value="both">Analogies + examples both</option><option value="plain">Plain clear explanation</option></select>
+        </div>
+      </div>
+      <div id="up-explain"></div>
+      <button class="gbtn" onclick="go('explain')">💡 Explain This Clearly</button>
+    </div>
+
+    <!-- FLASHCARD FORM -->
+    <div id="f-flash" style="display:none">
+      <span class="lbl">Topic for flashcards</span>
+      <textarea id="i-flash" placeholder="e.g. Biology definitions, French vocabulary, Historical dates, Physics formulas, Chemical equations..." rows="3"></textarea>
+      <div class="r2">
+        <div><span class="lbl">Number of cards</span>
+          <select id="fl-n"><option value="10">10 cards</option><option value="15" selected>15 cards</option><option value="20">20 cards</option><option value="30">30 cards</option></select>
+        </div>
+        <div><span class="lbl">Card type</span>
+          <select id="fl-t"><option value="term-def" selected>Term → Definition</option><option value="q-a">Question → Answer</option><option value="concept-ex">Concept → Example</option></select>
+        </div>
+      </div>
+      <div id="up-flash"></div>
+      <button class="gbtn" onclick="go('flash')">⚡ Create Flashcards</button>
+    </div>
+
+    <!-- ESSAY FORM -->
+    <div id="f-essay" style="display:none">
+      <span class="lbl">Essay title or question</span>
+      <textarea id="i-essay" placeholder="e.g. 'Critically analyse the causes of World War I'&#10;'The impact of social media on teenage mental health'&#10;'Compare photosynthesis and cellular respiration'" rows="3"></textarea>
+      <div class="r3">
+        <div><span class="lbl">Word count</span>
+          <select id="es-w"><option value="300">~300 words</option><option value="500" selected>~500 words</option><option value="800">~800 words</option><option value="1200">~1200 words</option></select>
+        </div>
+        <div><span class="lbl">Essay type</span>
+          <select id="es-t"><option value="argumentative">Argumentative</option><option value="analytical" selected>Analytical</option><option value="descriptive">Descriptive</option><option value="comparative">Comparative</option></select>
+        </div>
+        <div><span class="lbl">Academic level</span>
+          <select id="es-l"><option value="school">School</option><option value="college" selected>College</option><option value="university">University</option></select>
+        </div>
+      </div>
+      <button class="gbtn" onclick="go('essay')">✍️ Write Essay</button>
+    </div>
+
+    <!-- LOADING -->
+    <div class="ws-load" id="wsLoad">
+      <div class="spinner"></div>
+      <h3 id="ldTxt">AI is thinking...</h3>
+      <p id="ldTip">Usually takes 5–15 seconds</p>
+      <div class="load-bar"><div class="load-bar-fill" id="ldBar"></div></div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="ws-out" id="wsOut">
+      <div class="out-bar">
+        <h3 id="outTtl">Result</h3>
+        <div class="out-acts">
+          <button class="oab" onclick="doCopy()">📋 Copy</button>
+          <button class="oab pri" onclick="showForm()">↺ New</button>
+        </div>
+      </div>
+      <div id="outContent"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- Ad Slot (mid) -->
+<div class="ad-slot">
+  <div class="ad-placeholder">📢 Advertisement — Keeping StudyForge free for every student</div>
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div class="hiw section">
+  <div class="sec-head"><div class="sec-title">How it works</div><div class="sec-sub">Three steps to smarter studying</div></div>
+  <div class="hiw-grid">
+    <div class="hiw-card"><div class="hiw-num">1</div><div class="hiw-ico">🔐</div><h4>Sign in with Google</h4><p>One tap with your Google account. No password, no form, no payment. Your progress is saved automatically.</p></div>
+    <div class="hiw-card"><div class="hiw-num">2</div><div class="hiw-ico">📸</div><h4>Type a topic or upload</h4><p>Enter any topic, paste your notes, or take a photo of your textbook page. AI reads images and handwriting.</p></div>
+    <div class="hiw-card"><div class="hiw-num">3</div><div class="hiw-ico">⚡</div><h4>Get instant results</h4><p>Detailed notes, quizzes, mind maps, flashcards — generated in seconds. Copy, study, and ace your exams.</p></div>
+    <div class="hiw-card"><div class="hiw-num">4</div><div class="hiw-ico">🔄</div><h4>Unlimited, forever</h4><p>No daily limits, no premium tier, no credit system. Use every tool as many times as you want. Always free.</p></div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<div class="about-section section">
+  <div class="about-grid">
+    <div class="about-text">
+      <h2>Built for students,<br>by a student. <span style="color:var(--green)">Free forever.</span></h2>
+      <p>StudyForge AI was created with one simple belief: <span class="highlight">every student deserves access to the best study tools</span>, regardless of whether they can afford expensive subscriptions or coaching.</p>
+      <p>We've seen tools like Turbo.ai lock their best features behind paywalls. We think that's wrong. Education should never be pay-to-win. So we built StudyForge completely free — no premium plans, no hidden charges, no daily limits.</p>
+      <p>We keep the lights on through non-intrusive Google ads, which means <span class="highlight">you get world-class AI study tools at zero cost</span>, and we stay sustainable. That's the deal.</p>
+      <p style="color:var(--td);font-size:13px;">StudyForge AI uses advanced AI to generate educational content. Always verify important facts with your teacher or textbook. Results may vary by topic complexity.</p>
+    </div>
+    <div class="about-cards">
+      <div class="about-card"><div class="about-card-ico">🎓</div><div><h4>Education-first</h4><p>Every feature is designed to genuinely help students learn — not just to look impressive. We focus on what actually improves exam performance.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">🔒</div><div><h4>Privacy by design</h4><p>We never sell your data. We never spam. Your notes and uploads are used only to generate your results and are never stored or shared.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">🌍</div><div><h4>Works for every exam</h4><p>JEE, NEET, CBSE, ICSE, SAT, ACT, GCSE, A-Level, IB — our tools understand the style and depth required for every major exam system.</p></div></div>
+      <div class="about-card"><div class="about-card-ico">📱</div><div><h4>Works on any device</h4><p>Phone, tablet, laptop — StudyForge is fully responsive. Use the camera feature on mobile to photograph your notes and get instant study material.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MISSION ═══ -->
+<div class="mission" style="margin:0 20px 80px;">
+  <h2>Our mission is simple 🎯</h2>
+  <p>Make the best AI study tools available to every student in the world — from someone in a small town in Rajasthan to a student in London. No paywalls. No gatekeeping. Just learning.</p>
+  <div class="mission-pills">
+    <span class="mp">Completely free, always</span>
+    <span class="mp">No premium plans ever</span>
+    <span class="mp">No daily usage limits</span>
+    <span class="mp">Works for every subject</span>
+    <span class="mp">Works for every exam</span>
+    <span class="mp">Camera & file upload</span>
+    <span class="mp">No data selling</span>
+    <span class="mp">Built by a student</span>
+  </div>
+</div>
+
+<!-- Ad Slot (bottom) -->
+<div class="ad-slot" style="margin-bottom:60px;">
+  <div class="ad-placeholder">📢 Advertisement</div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="fl">Study<em>Forge</em> AI</div>
+      <p>The most powerful free AI study platform. Notes, quizzes, mind maps, flashcards, explanations and essays — completely free for every student, everywhere, forever.</p>
+      <div class="footer-free-badge">✓ Free Forever · No Premium Plans</div>
+    </div>
+    <div class="footer-col">
+      <h5>Tools</h5>
+      <a href="#" onclick="openTool('notes')">Notes Maker</a>
+      <a href="#" onclick="openTool('quiz')">Quiz Generator</a>
+      <a href="#" onclick="openTool('mindmap')">Mind Maps</a>
+      <a href="#" onclick="openTool('explain')">Topic Explainer</a>
+      <a href="#" onclick="openTool('flash')">Flashcards</a>
+      <a href="#" onclick="openTool('essay')">Essay Writer</a>
+    </div>
+    <div class="footer-col">
+      <h5>About</h5>
+      <a href="#tools">How it works</a>
+      <a href="#" onclick="document.querySelector('.about-section').scrollIntoView({behavior:'smooth'})">Our mission</a>
+      <a href="/cdn-cgi/l/email-protection#177f727b7b7857646362736e717865707239767e">Contact us</a>
+      <a href="#">Privacy policy</a>
+      <a href="#">Terms of service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 StudyForge AI · Made with ❤️ for students everywhere · Powered by Claude AI</p>
+    <p style="color:var(--td)">Free forever · No premium · No paywalls</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ═══════════════════════════════════════════════════
+// STUDYFORGE AI — COMPLETE JAVASCRIPT ENGINE
+// All functions defined before use. Safari compatible.
+// ═══════════════════════════════════════════════════
+
+// ── STATE ─────────────────────────────────────────
+var API      = '/api/chat';
+var user     = null;
+var uploads  = [];
+var tool     = null;
+var lastOut  = '';
+var qData    = [];
+var qAns     = {};
+var qDone    = 0;
+var ldTimer  = null;
+var ldPct    = 0;
+
+// ── TOAST (defined first — needed by everything else) ──
+function sf_toast(msg, isErr) {
+  try {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'toast show' + (isErr ? ' err' : '');
+    clearTimeout(sf_toast._tid);
+    sf_toast._tid = setTimeout(function() {
+      t.className = 'toast';
+    }, 3200);
+  } catch(e) { /* silent */ }
+}
+window._sfToast = sf_toast;
+
+// ── AUTH ──────────────────────────────────────────
+function doGoogleSignIn() {
+  if (typeof window._sfSignIn === 'function') {
+    window._sfSignIn();
+  } else {
+    sf_toast('Loading Google Sign In...', false);
+    var tries = 0;
+    var wait = setInterval(function() {
+      tries++;
+      if (typeof window._sfSignIn === 'function') {
+        clearInterval(wait);
+        window._sfSignIn();
+      } else if (tries > 25) {
+        clearInterval(wait);
+        sf_toast('Google Sign In unavailable. Use Start Free instead.', true);
+      }
+    }, 300);
+  }
+}
+
+function startGuest() {
+  var nameEl = document.getElementById('guestName');
+  var n = nameEl ? (nameEl.value || '').trim() : '';
+  window._sfOnUser({
+    displayName: n || 'Student',
+    photoURL: null,
+    uid: 'guest_' + Date.now(),
+    isGuest: true
+  });
+}
+
+window._sfOnUser = function(u) {
+  user = u;
+  if (u) {
+    var gate = document.getElementById('gate');
+    if (gate) gate.className = 'gone';
+
+    var nm = document.getElementById('uname');
+    if (nm) {
+      nm.textContent = (u.displayName || 'Student').split(' ')[0];
+      nm.style.display = 'block';
+    }
+    var av = document.getElementById('uav');
+    if (av && u.photoURL) {
+      av.src = u.photoURL;
+      av.style.display = 'block';
+    }
+    var sb = document.getElementById('soBtn');
+    if (sb) sb.style.display = 'block';
+
+    sf_toast('Welcome, ' + (u.displayName || 'Student').split(' ')[0] + '! All tools are free.');
+  } else {
+    var gate = document.getElementById('gate');
+    if (gate) gate.className = '';
+
+    var nm = document.getElementById('uname');
+    if (nm) nm.style.display = 'none';
+    var av = document.getElementById('uav');
+    if (av) av.style.display = 'none';
+    var sb = document.getElementById('soBtn');
+    if (sb) sb.style.display = 'none';
+  }
+};
+
+// Sign out fallback
+if (!window._sfSignOut) {
+  window._sfSignOut = function() { window._sfOnUser(null); };
+}
+
+// ── TOOL METADATA ─────────────────────────────────
+var TM = {
+  notes:   { title: 'Notes Maker',     ico: '\uD83D\uDCDD', bg: 'rgba(34,197,94,0.15)'  },
+  quiz:    { title: 'Quiz Generator',  ico: '\uD83C\uDFAF', bg: 'rgba(99,102,241,0.15)' },
+  mindmap: { title: 'Mind Map',        ico: '\uD83E\uDDE0', bg: 'rgba(168,85,247,0.15)' },
+  explain: { title: 'Topic Explainer', ico: '\uD83D\uDCA1', bg: 'rgba(34,211,238,0.15)' },
+  flash:   { title: 'Flashcards',      ico: '\u26A1',       bg: 'rgba(245,158,11,0.15)' },
+  essay:   { title: 'Essay Writer',    ico: '\u270D\uFE0F', bg: 'rgba(236,72,153,0.15)' }
+};
+
+// ── OPEN / CLOSE TOOL ─────────────────────────────
+function openTool(t) {
+  if (!user) {
+    sf_toast('Click Start Free to begin!', true);
+    var gate = document.getElementById('gate');
+    if (gate) gate.className = '';
+    return;
+  }
+  tool = t;
+  uploads = [];
+
+  // highlight active card
+  var cards = document.querySelectorAll('.tc');
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
+  var active = document.querySelector('[data-t="' + t + '"]');
+  if (active) active.classList.add('active');
+
+  // set workspace header
+  var m = TM[t];
+  var ico = document.getElementById('wsIco');
+  if (ico) { ico.style.background = m.bg; ico.textContent = m.ico; }
+  var ttl = document.getElementById('wsTtl');
+  if (ttl) ttl.textContent = m.title;
+
+  // inject upload zones for supported tools
+  var upTools = ['notes', 'quiz', 'explain', 'flash'];
+  for (var k in TM) {
+    var el = document.getElementById('up-' + k);
+    if (!el) continue;
+    if (k === t && upTools.indexOf(k) > -1) {
+      el.innerHTML = buildUpZone(t);
+    } else {
+      el.innerHTML = '';
+    }
+  }
+
+  showForm();
+
+  var ws = document.getElementById('wsWrap');
+  if (ws) {
+    ws.classList.add('open');
+    setTimeout(function() {
+      ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
+}
+
+function closeTool() {
+  var ws = document.getElementById('wsWrap');
+  if (ws) ws.classList.remove('open');
+  var cards = document.querySelectorAll('.tc');
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
+  tool = null;
+  uploads = [];
+}
+
+function showForm() {
+  for (var k in TM) {
+    var f = document.getElementById('f-' + k);
+    if (f) f.style.display = (k === tool) ? 'block' : 'none';
+  }
+  var ld = document.getElementById('wsLoad');
+  if (ld) ld.classList.remove('show');
+  var out = document.getElementById('wsOut');
+  if (out) out.classList.remove('show');
+  if (ldTimer) { clearInterval(ldTimer); ldTimer = null; }
+  // remove old error box
+  var old = document.getElementById('sfErrBox');
+  if (old) old.remove();
+}
+
+// ── UPLOAD ────────────────────────────────────────
+function buildUpZone(t) {
+  return '<div class="up-row">'
+    + '<button class="upbtn" onclick="doUpload(\'' + t + '\')">&#128193; Upload file or image</button>'
+    + '<button class="upbtn" onclick="doCamera(\'' + t + '\')">&#128247; Take photo with camera</button>'
+    + '</div><div class="file-prev" id="prev-' + t + '"></div>';
+}
+
+function doUpload(t) {
+  var fi = document.getElementById('fi');
+  if (!fi) return;
+  fi.onchange = function(e) { handleUp(e.target.files, t); fi.value = ''; };
+  fi.click();
+}
+
+function doCamera(t) {
+  var ci = document.getElementById('ci');
+  if (!ci) return;
+  ci.onchange = function(e) { handleUp(e.target.files, t); ci.value = ''; };
+  ci.click();
+}
+
+function handleUp(files, t) {
+  if (!files || !files.length) return;
+  var promises = [];
+  for (var i = 0; i < files.length; i++) {
+    (function(f) {
+      if (f.size > 40 * 1024 * 1024) { sf_toast('Max 40MB per file', true); return; }
+      var isImg = f.type.indexOf('image/') === 0;
+      promises.push(
+        f2b64(f).then(function(b64) {
+          var idx = uploads.length;
+          uploads.push({ base64: b64, media_type: f.type, name: f.name, isImg: isImg });
+          var prev = document.getElementById('prev-' + t);
+          if (!prev) return;
+          var d = document.createElement('div');
+          d.className = 'fp-item';
+          d.id = 'fpi' + idx;
+          if (isImg) {
+            var url = URL.createObjectURL(f);
+            d.innerHTML = '<img src="' + url + '" alt="' + f.name + '"><div class="fp-name">' + f.name + '</div><button class="fp-rm" onclick="rmUp(' + idx + ',\'' + t + '\')">&#10005;</button>';
+          } else {
+            var ext = f.name.split('.').pop().toUpperCase();
+            d.innerHTML = '<div class="fp-doc"><span>&#128196;</span><small>' + ext + '</small></div><div class="fp-name">' + f.name + '</div><button class="fp-rm" onclick="rmUp(' + idx + ',\'' + t + '\')">&#10005;</button>';
+          }
+          prev.appendChild(d);
+        })
+      );
+    })(files[i]);
+  }
+  Promise.all(promises).then(function() {
+    sf_toast(files.length + ' file' + (files.length > 1 ? 's' : '') + ' ready');
+  });
+}
+
+function rmUp(i, t) {
+  uploads.splice(i, 1);
+  var el = document.getElementById('fpi' + i);
+  if (el) el.remove();
+}
+
+function f2b64(file) {
+  return new Promise(function(resolve, reject) {
+    // Validate file exists and is an image
+    if (!file) { reject(new Error('No file provided')); return; }
+
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      try {
+        var result = e.target.result;
+        if (!result) { reject(new Error('FileReader returned empty result')); return; }
+
+        // result is like "data:image/jpeg;base64,/9j/..."
+        // We need ONLY the base64 part after the comma
+        var parts = result.split(',');
+        if (parts.length < 2 || !parts[1]) {
+          reject(new Error('Could not extract base64 from file'));
+          return;
+        }
+
+        // Validate it looks like base64
+        var b64 = parts[1].trim();
+        if (b64.length === 0) {
+          reject(new Error('Base64 data is empty'));
+          return;
+        }
+
+        resolve(b64);
+      } catch(err) {
+        reject(err);
+      }
     };
+
+    reader.onerror = function() {
+      reject(new Error('Failed to read file: ' + (reader.error ? reader.error.message : 'unknown error')));
+    };
+
+    reader.onabort = function() {
+      reject(new Error('File reading was aborted'));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── GET INPUT ─────────────────────────────────────
+function getInp(t) {
+  var ids = { notes: 'i-notes', quiz: 'i-quiz', mindmap: 'i-mindmap', explain: 'i-explain', flash: 'i-flash', essay: 'i-essay' };
+  var el = document.getElementById(ids[t]);
+  return el ? (el.value || '').trim() : '';
+}
+
+// ── MAIN GO ───────────────────────────────────────
+function go(t) {
+  if (!user) {
+    sf_toast('Click Start Free to begin!', true);
+    var gate = document.getElementById('gate');
+    if (gate) gate.className = '';
+    return;
+  }
+
+  var inp = getInp(t);
+  var imgUploads = uploads.filter(function(u) { return u.isImg; });
+
+  if (!inp && uploads.length === 0) {
+    sf_toast('Enter a topic or upload a file first!', true);
+    return;
+  }
+
+  // hide all forms
+  for (var k in TM) {
+    var f = document.getElementById('f-' + k);
+    if (f) f.style.display = 'none';
+  }
+  var old = document.getElementById('sfErrBox');
+  if (old) old.remove();
+
+  // show loading
+  var ld = document.getElementById('wsLoad');
+  if (ld) ld.classList.add('show');
+  var out = document.getElementById('wsOut');
+  if (out) out.classList.remove('show');
+
+  // progress bar animation
+  ldPct = 5;
+  var ldBar = document.getElementById('ldBar');
+  if (ldBar) ldBar.style.width = '5%';
+
+  var msgMap = {
+    notes:   ['Reading your topic...', 'Structuring notes...', 'Writing key points...', 'Adding examples...'],
+    quiz:    ['Analysing content...', 'Writing questions...', 'Building choices...', 'Adding explanations...'],
+    mindmap: ['Mapping the topic...', 'Building branches...', 'Connecting subtopics...', 'Finalising...'],
+    explain: ['Thinking about this...', 'Crafting explanation...', 'Finding analogies...', 'Almost there...'],
+    flash:   ['Finding key terms...', 'Writing card fronts...', 'Writing answers...', 'Packaging deck...'],
+    essay:   ['Planning structure...', 'Writing intro...', 'Developing arguments...', 'Writing conclusion...']
+  };
+  var ms = msgMap[t] || ['Thinking...'];
+  var mi = 0;
+  var ldTxt = document.getElementById('ldTxt');
+  if (ldTxt) ldTxt.textContent = ms[0];
+
+  if (ldTimer) clearInterval(ldTimer);
+  ldTimer = setInterval(function() {
+    mi = (mi + 1) % ms.length;
+    if (ldTxt) ldTxt.textContent = ms[mi];
+    ldPct = Math.min(ldPct + 16, 88);
+    if (ldBar) ldBar.style.width = ldPct + '%';
+  }, 2200);
+
+  var prompt = buildPrompt(t, inp);
+  var images = imgUploads.map(function(u) {
+    return { type: 'image', media_type: u.media_type, data: u.base64 };
+  });
+
+  // Validate and clean images before sending
+  var cleanImages = [];
+  for (var ci = 0; ci < images.length; ci++) {
+    var img = images[ci];
+    if (!img || !img.data || !img.media_type) {
+      console.warn('[StudyForge] Skipping invalid image at index', ci);
+      continue;
+    }
+    // Strip data URL prefix if present (safety net)
+    var cleanData = img.data;
+    if (cleanData.indexOf(',') > -1) {
+      cleanData = cleanData.split(',')[1];
+    }
+    if (!cleanData || cleanData.length < 100) {
+      console.warn('[StudyForge] Skipping image with too-short base64 at index', ci);
+      continue;
+    }
+    cleanImages.push({
+      type: 'image',
+      media_type: img.media_type,
+      data: cleanData
+    });
+  }
+
+  var body = { prompt: prompt };
+  if (cleanImages.length > 0) {
+    body.images = cleanImages;
+    console.log('[StudyForge] Sending', cleanImages.length, 'image(s) to backend');
+  }
+
+  console.log('[StudyForge] Fetching', API, '| Prompt length:', prompt.length);
+
+  fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(function(resp) {
+    clearInterval(ldTimer); ldTimer = null;
+    if (ldBar) ldBar.style.width = '100%';
+
+    if (!resp.ok) {
+      return resp.json().catch(function() { return {}; }).then(function(errData) {
+        throw new Error(errData.error || 'Server error ' + resp.status + ' — check CLAUDE_API_KEY in Vercel');
+      });
+    }
+    return resp.json();
+  })
+  .then(function(data) {
+    var raw = (data.result || '').trim();
+    if (!raw) throw new Error('AI returned empty response. Please try again.');
+
+    if (ld) ld.classList.remove('show');
+    lastOut = raw;
+    uploads = [];
+    renderOut(t, raw);
+  })
+  .catch(function(e) {
+    clearInterval(ldTimer); ldTimer = null;
+    if (ld) ld.classList.remove('show');
+    showForm();
+
+    sf_toast(e.message.substring(0, 90), true);
+
+    // show error in the form
+    var errBox = document.createElement('div');
+    errBox.id = 'sfErrBox';
+    errBox.style.cssText = 'background:rgba(239,68,68,0.1);border:1px solid #ef4444;border-radius:12px;padding:16px;margin-top:14px;font-size:13px;color:#ef4444;line-height:1.6;';
+    errBox.innerHTML = '<strong>Error:</strong> ' + e.message
+      + '<br><br><span style="color:#8888bb">Check: CLAUDE_API_KEY is set in Vercel > Settings > Environment Variables, then Redeploy.</span>';
+    var form = document.getElementById('f-' + t);
+    if (form) form.appendChild(errBox);
+  });
+}
+
+// ── PROMPT BUILDER ────────────────────────────────
+function buildPrompt(t, inp) {
+  var hasImg = uploads.filter(function(u) { return u.isImg; }).length > 0;
+  var ic = hasImg
+    ? '\n\nIMPORTANT: The student uploaded an image. Read ALL text, diagrams, and content from it carefully. Use it as primary source material combined with any text topic provided.'
+    : '';
+
+  if (t === 'notes') {
+    var d = (document.getElementById('n-det') || {}).value || 'standard';
+    var s = (document.getElementById('n-sub') || {}).value || 'any';
+    var gMap = {
+      overview: '3-4 bullet points per section, key terms only',
+      standard: 'clear paragraphs with definitions, key facts, bolded important points',
+      detailed: 'thorough paragraphs: mechanisms, causes/effects, examples, misconceptions, applications',
+      ultra: 'exhaustive coverage: every sub-topic, all formulas with context, worked examples, exam tips, memory aids, common errors, connections to related topics. Minimum 900 words.'
+    };
+    return 'You are an expert ' + s + ' teacher writing premium revision notes for an exam student.' + ic + '\n\n'
+      + 'Create ' + d + ' study notes on: "' + (inp || 'the uploaded content') + '"\n\n'
+      + 'START DIRECTLY WITH THE NOTES — no preamble:\n\n'
+      + '# ' + (inp || 'Topic') + '\n\n'
+      + '## Overview\n[2-3 sentence intro]\n\n'
+      + '## [Most Important Section]\n[' + gMap[d] + ']\n\n'
+      + '## [Second Section]\n[content]\n\n'
+      + '[Add sections as needed]\n\n'
+      + '## Key Definitions\n**Term**: precise definition\n[minimum 5 terms]\n\n'
+      + '## Must-Know Facts\n- [fact or formula]\n[minimum 6 points]\n\n'
+      + '## Common Exam Questions\n- Question 1?\n- Question 2?\n- Question 3?\n\n'
+      + '## Quick Revision\n- Most important point\n- Second point\n- Third point\n\n'
+      + 'Quality: A student should pass an exam from these notes alone. Bold all key terms.';
+  }
+
+  if (t === 'quiz') {
+    var n = (document.getElementById('q-n') || {}).value || '10';
+    var d = (document.getElementById('q-d') || {}).value || 'medium';
+    var s = (document.getElementById('q-s') || {}).value || 'general';
+    return 'You are an expert ' + s + ' exam question setter.' + ic + '\n\n'
+      + 'Create exactly ' + n + ' MCQs at ' + d + ' difficulty on: "' + (inp || 'the uploaded content') + '"\n\n'
+      + 'Return ONLY a valid JSON array. No markdown, no explanation, nothing else:\n'
+      + '[{"question":"question text?","options":["A: option","B: option","C: option","D: option"],"correct":0,"explanation":"2-3 sentences: why correct answer is right AND why wrong options are wrong"}]\n\n'
+      + 'Rules: correct=0-based index. All 4 options must be plausible. Mix recall/understanding/application. Explanations must be educational.';
+  }
+
+  if (t === 'mindmap') {
+    var b = (document.getElementById('mm-b') || {}).value || '7';
+    var d = (document.getElementById('mm-d') || {}).value || 'medium';
+    return 'Create a comprehensive mind map for "' + inp + '" with exactly ' + b + ' main branches (' + d + ' depth).\n\n'
+      + 'Return ONLY this JSON — nothing else:\n'
+      + '{"center":"' + inp + '","branches":[{"label":"2-3 word label","color":"#hexcolor","children":["specific subtopic","specific subtopic","specific subtopic","specific subtopic"]}]}\n\n'
+      + 'Use exactly ' + b + ' branches. Use different vivid hex colors: #818cf8,#22c55e,#f59e0b,#ec4899,#22d3ee,#ef4444,#a855f7,#84cc16. Each branch needs 3-4 specific children.';
+  }
+
+  if (t === 'explain') {
+    var l = (document.getElementById('e-l') || {}).value || 'student';
+    var s = (document.getElementById('e-s') || {}).value || 'example';
+    var lMap = {
+      child: 'Use simple everyday words a 10-year-old knows. No jargon. Short sentences. Use fun analogies.',
+      student: 'Use clear academic language. Define technical terms. Cover what, why, and how. CBSE/JEE/GCSE level.',
+      advanced: 'Full technical vocabulary. Discuss mechanisms, math relationships, edge cases. Degree level.'
+    };
+    return 'You are the world\'s best teacher. Give this student a genuine "aha moment" about "' + (inp || 'the uploaded content') + '".' + ic + '\n\n'
+      + 'Level: ' + lMap[l] + '\n\n'
+      + '## What is ' + (inp || 'this') + '?\n[Main explanation]\n\n'
+      + '## Why does it matter?\n[Real-world relevance]\n\n'
+      + (s !== 'plain' ? '## Real-World Analogy\n> [A vivid memorable analogy]\n\n' : '')
+      + (s === 'example' || s === 'both' ? '## Worked Example\n[Step-by-step concrete example]\n\n' : '')
+      + '## The Core Insight\n[ONE sentence — the thing they must never forget]\n\n'
+      + '## Quick Self-Check\n- [Test question 1]\n- [Test question 2]';
+  }
+
+  if (t === 'flash') {
+    var n = (document.getElementById('fl-n') || {}).value || '15';
+    var ty = (document.getElementById('fl-t') || {}).value || 'term-def';
+    var tyMap = {
+      'term-def': 'term on front, 2-3 sentence definition with example on back',
+      'q-a': 'exam question on front, complete model answer on back',
+      'concept-ex': 'concept on front, concrete real-world example on back'
+    };
+    return 'Create ' + n + ' revision flashcards for "' + (inp || 'the uploaded content') + '".' + ic + '\n'
+      + 'Style: ' + (tyMap[ty] || tyMap['term-def']) + '\n\n'
+      + 'Return ONLY a JSON array — nothing else:\n'
+      + '[{"front":"concise specific front text","back":"educational back text 2-4 sentences with specific details"}]\n\n'
+      + 'Cover the ' + n + ' most important exam-likely concepts. Backs must be genuinely educational.';
+  }
+
+  if (t === 'essay') {
+    var w = (document.getElementById('es-w') || {}).value || '500';
+    var ty = (document.getElementById('es-t') || {}).value || 'analytical';
+    var l = (document.getElementById('es-l') || {}).value || 'college';
+    return 'Write an excellent ' + w + '-word ' + ty + ' essay at ' + l + ' level on: "' + inp + '"\n\n'
+      + 'Requirements: specific evidence (real names, dates, stats), clear argument, sophisticated vocabulary, each paragraph has topic sentence + evidence + analysis + link.\n\n'
+      + '# ' + inp + '\n\n'
+      + '## Introduction\n[Hook. Context. Clear arguable thesis.]\n\n'
+      + '## [First Main Point]\n[Topic sentence. 2 pieces of evidence. Analysis. Link.]\n\n'
+      + '## [Second Main Point]\n[Topic sentence. Evidence. Analysis. Link.]\n\n'
+      + (parseInt(w) >= 600 ? '## [Third Main Point]\n[Topic sentence. Evidence. Analysis. Link.]\n\n' : '')
+      + '## Conclusion\n[Restate thesis freshly. Synthesise arguments. Broader significance.]\n\n'
+      + 'Target ~' + w + ' words. Every sentence earns its place.';
+  }
+
+  return 'Help with: ' + inp + ic;
+}
+
+// ── JSON EXTRACTOR ────────────────────────────────
+function safeJSON(raw) {
+  if (!raw) return null;
+  // 1. Direct parse
+  try { return JSON.parse(raw.trim()); } catch(e) {}
+  // 2. Fenced code block
+  var fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) { try { return JSON.parse(fenced[1].trim()); } catch(e) {} }
+  // 3. First array pattern
+  var arrM = raw.match(/\[\s*\{[\s\S]*?\}\s*\]/);
+  if (arrM) { try { return JSON.parse(arrM[0]); } catch(e) {} }
+  // 4. First object pattern
+  var objM = raw.match(/\{[\s\S]*\}/);
+  if (objM) { try { return JSON.parse(objM[0]); } catch(e) {} }
+  // 5. Bracket depth search
+  var ai = raw.indexOf('['), oi = raw.indexOf('{');
+  var si = (ai === -1) ? oi : (oi === -1) ? ai : Math.min(ai, oi);
+  if (si > -1) {
+    var sl = raw.slice(si);
+    var op = sl[0], cl = op === '[' ? ']' : '}';
+    var depth = 0, end = -1;
+    for (var i = 0; i < sl.length; i++) {
+      if (sl[i] === op) depth++;
+      else if (sl[i] === cl && (--depth) === 0) { end = i; break; }
+    }
+    if (end > -1) { try { return JSON.parse(sl.slice(0, end + 1)); } catch(e) {} }
+  }
+  return null;
+}
+
+// ── RENDER OUTPUT ─────────────────────────────────
+function renderOut(t, raw) {
+  var out = document.getElementById('wsOut');
+  if (out) out.classList.add('show');
+
+  var titles = { notes: 'Your Notes', quiz: 'Your Quiz', mindmap: 'Mind Map', explain: 'Explanation', flash: 'Flashcards', essay: 'Your Essay' };
+  var ttl = document.getElementById('outTtl');
+  if (ttl) ttl.textContent = titles[t] || 'Result';
+
+  var el = document.getElementById('outContent');
+  if (!el) return;
+  el.innerHTML = '';
+
+  // Prose tools
+  if (t === 'notes' || t === 'explain' || t === 'essay') {
+    el.innerHTML = '<div class="prose">' + md2html(raw) + '</div>';
+    return;
+  }
+
+  var warn = '<p style="color:#f59e0b;font-weight:700;padding:12px;background:rgba(245,158,11,0.1);border-radius:10px;margin-bottom:16px">';
+  var parsed = safeJSON(raw);
+
+  if (t === 'quiz') {
+    if (parsed && Array.isArray(parsed) && parsed.length && parsed[0] && parsed[0].question) {
+      qData = parsed; qAns = {}; qDone = 0;
+      rQuiz(el);
+    } else {
+      el.innerHTML = '<div class="prose">' + warn + '&#9888; Showing as text. Try a more specific topic.</p>' + md2html(raw) + '</div>';
+    }
+  } else if (t === 'mindmap') {
+    if (parsed && parsed.center && Array.isArray(parsed.branches) && parsed.branches.length) {
+      rMM(el, parsed);
+    } else {
+      el.innerHTML = '<div class="prose">' + warn + '&#9888; Mind map could not render. Try again.</p>' + md2html(raw) + '</div>';
+    }
+  } else if (t === 'flash') {
+    if (parsed && Array.isArray(parsed) && parsed.length && parsed[0] && parsed[0].front) {
+      rFlash(el, parsed);
+    } else {
+      el.innerHTML = '<div class="prose">' + warn + '&#9888; Could not parse flashcards. Try again.</p>' + md2html(raw) + '</div>';
+    }
+  }
+}
+
+// ── MARKDOWN TO HTML ──────────────────────────────
+function md2html(s) {
+  if (!s) return '';
+  return s
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^---$/gm, '<hr>')
+    .replace(/^[-\u2022] (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, function(m) { return '<ul>' + m + '</ul>'; })
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    .split('\n\n').map(function(p) {
+      return p.trim().charAt(0) === '<' ? p : '<p>' + p + '</p>';
+    }).join('');
+}
+
+// ── QUIZ RENDERER ─────────────────────────────────
+function rQuiz(el) {
+  var L = ['A', 'B', 'C', 'D'];
+  var html = '<div class="qscore" id="qsc">'
+    + '<div><div class="sbig" id="sbig">&mdash;</div></div>'
+    + '<div class="qscore-right">'
+    + '<div class="qscore-msg" id="smsg">Answer all questions to see your score</div>'
+    + '<div class="qscore-sub" id="ssub">0 of ' + qData.length + ' answered</div>'
+    + '<div class="strack"><div class="sfill" id="sfill" style="width:0%"></div></div>'
+    + '</div></div>';
+
+  for (var i = 0; i < qData.length; i++) {
+    var q = qData[i];
+    html += '<div class="qcard">'
+      + '<div class="qnum">Question ' + (i+1) + ' of ' + qData.length + '</div>'
+      + '<div class="qtxt">' + q.question + '</div>'
+      + '<ul class="olist">';
+    for (var j = 0; j < (q.options || []).length; j++) {
+      html += '<li><button class="ob" id="ob' + i + '_' + j + '" onclick="pQ(' + i + ',' + j + ')">'
+        + '<span class="ol">' + L[j] + '</span>' + q.options[j]
+        + '</button></li>';
+    }
+    html += '</ul><div class="qexp" id="ex' + i + '">' + (q.explanation || '') + '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function pQ(qi, oi) {
+  if (qAns[qi] !== undefined) return;
+  qAns[qi] = oi;
+  qDone++;
+  var cor = qData[qi].correct;
+  for (var j = 0; j < 4; j++) {
+    var b = document.getElementById('ob' + qi + '_' + j);
+    if (!b) continue;
+    b.disabled = true;
+    if (j === cor) b.classList.add('ok');
+    if (j === oi && oi !== cor) b.classList.add('no');
+  }
+  var expEl = document.getElementById('ex' + qi);
+  if (expEl) expEl.classList.add('show');
+  var subEl = document.getElementById('ssub');
+  if (subEl) subEl.textContent = qDone + ' of ' + qData.length + ' answered';
+
+  if (qDone === qData.length) {
+    var correct = 0;
+    for (var key in qAns) {
+      if (qAns[key] === qData[parseInt(key)].correct) correct++;
+    }
+    var pct = Math.round(correct / qData.length * 100);
+    var sc = document.getElementById('qsc');
+    if (sc) sc.classList.add('show');
+    var sbig = document.getElementById('sbig');
+    if (sbig) { sbig.textContent = pct + '%'; sbig.style.color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)'; }
+    var smsg = document.getElementById('smsg');
+    if (smsg) smsg.textContent = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort! Keep going' : 'Keep practising!';
+    if (subEl) subEl.textContent = correct + ' correct out of ' + qData.length;
+    var fill = document.getElementById('sfill');
+    if (fill) {
+      fill.style.background = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+      setTimeout(function() { fill.style.width = pct + '%'; }, 50);
+    }
+    if (sc) sc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ── MIND MAP RENDERER ─────────────────────────────
+function rMM(el, mm) {
+  var W=840, H=560, cx=W/2, cy=H/2, r=120;
+  var br = mm.branches || [];
+  var n = br.length;
+  if (n === 0) { el.innerHTML = '<div class="prose"><p>No branches found.</p></div>'; return; }
+  var paths = '', nodes = '';
+
+  for (var i = 0; i < n; i++) {
+    var b = br[i];
+    var ang = (2 * Math.PI * i / n) - Math.PI / 2;
+    var bx = cx + r * Math.cos(ang);
+    var by = cy + r * Math.sin(ang);
+    var col = b.color || '#818cf8';
+
+    paths += '<line x1="' + cx + '" y1="' + cy + '" x2="' + bx + '" y2="' + by + '" stroke="' + col + '" stroke-width="2.5" opacity="0.4"/>';
+
+    var children = b.children || [];
+    for (var j = 0; j < children.length; j++) {
+      var ch = children[j];
+      var sp = 0.4;
+      var ca = ang + (j - (children.length - 1) / 2) * sp;
+      var cr2 = r + 100;
+      var chx = cx + cr2 * Math.cos(ca);
+      var chy = cy + cr2 * Math.sin(ca);
+      paths += '<line x1="' + bx + '" y1="' + by + '" x2="' + chx + '" y2="' + chy + '" stroke="' + col + '" stroke-width="1.5" opacity="0.25"/>';
+
+      var words = ch.split(' '), lines = [], cur = '';
+      for (var w = 0; w < words.length; w++) {
+        if ((cur + ' ' + words[w]).length > 14 && cur) { lines.push(cur); cur = words[w]; }
+        else { cur = cur ? cur + ' ' + words[w] : words[w]; }
+      }
+      if (cur) lines.push(cur);
+
+      nodes += '<g><ellipse cx="' + chx + '" cy="' + chy + '" rx="' + Math.min(58, ch.length * 4 + 20) + '" ry="16" fill="' + col + '18" stroke="' + col + '" stroke-width="1" opacity="0.65"/>';
+      for (var li = 0; li < lines.length; li++) {
+        nodes += '<text x="' + chx + '" y="' + (chy + (li - (lines.length - 1) / 2) * 13 + 4) + '" text-anchor="middle" font-family="sans-serif" font-size="10" fill="' + col + '">' + lines[li] + '</text>';
+      }
+      nodes += '</g>';
+    }
+
+    var blabel = b.label || '';
+    var bwords = blabel.split(' '), blines = [], bcur = '';
+    for (var w = 0; w < bwords.length; w++) {
+      if ((bcur + ' ' + bwords[w]).length > 11 && bcur) { blines.push(bcur); bcur = bwords[w]; }
+      else { bcur = bcur ? bcur + ' ' + bwords[w] : bwords[w]; }
+    }
+    if (bcur) blines.push(bcur);
+
+    nodes += '<g><ellipse cx="' + bx + '" cy="' + by + '" rx="56" ry="24" fill="' + col + '22" stroke="' + col + '" stroke-width="2"/>';
+    for (var li = 0; li < blines.length; li++) {
+      nodes += '<text x="' + bx + '" y="' + (by + (li - (blines.length - 1) / 2) * 16 + 5) + '" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="' + col + '">' + blines[li] + '</text>';
+    }
+    nodes += '</g>';
+  }
+
+  el.innerHTML = '<div class="mm-wrap"><svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="max-width:100%;height:auto">'
+    + paths + nodes
+    + '<ellipse cx="' + cx + '" cy="' + cy + '" rx="74" ry="33" fill="#6366f118" stroke="#818cf8" stroke-width="2.5"/>'
+    + '<text x="' + cx + '" y="' + (cy + 6) + '" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="800" fill="#a5b4fc">' + mm.center + '</text>'
+    + '</svg></div>';
+}
+
+// ── FLASHCARD RENDERER ────────────────────────────
+function rFlash(el, cards) {
+  var html = '<div class="fc-intro"><span>Tap any card to reveal the answer</span><span class="fc-prog" id="fcprog">0 / ' + cards.length + ' flipped</span></div><div class="fgrid">';
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    html += '<div class="fc" id="fc' + i + '" onclick="flipFC(' + i + ',' + cards.length + ')">'
+      + '<div class="fc-f">' + c.front + '</div>'
+      + '<div class="fc-b">' + c.back + '</div>'
+      + '<div class="fc-hint">Tap to reveal</div>'
+      + '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function flipFC(i, total) {
+  var c = document.getElementById('fc' + i);
+  if (!c) return;
+  c.classList.toggle('flp');
+  var hint = c.querySelector('.fc-hint');
+  if (hint) hint.textContent = c.classList.contains('flp') ? 'Tap to flip back' : 'Tap to reveal';
+  var flipped = document.querySelectorAll('.fc.flp').length;
+  var prog = document.getElementById('fcprog');
+  if (prog) prog.textContent = flipped + ' / ' + total + ' flipped';
+}
+
+// ── COPY ──────────────────────────────────────────
+function doCopy() {
+  if (!lastOut) { sf_toast('Nothing to copy yet', true); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(lastOut)
+      .then(function() { sf_toast('Copied to clipboard!'); })
+      .catch(function() { sf_toast('Copy failed — try selecting text manually', true); });
+  } else {
+    // Safari fallback
+    var ta = document.createElement('textarea');
+    ta.value = lastOut;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); sf_toast('Copied!'); }
+    catch(e) { sf_toast('Copy failed', true); }
+    document.body.removeChild(ta);
+  }
+}
+
+// ── SIGN OUT ──────────────────────────────────────
+function signOut() {
+  if (typeof window._sfSignOut === 'function') {
+    window._sfSignOut();
+  } else {
+    window._sfOnUser(null);
+  }
+}
+
+console.log('[StudyForge] JS engine loaded successfully.');
+</script>
+</body>
+</html>    };
 
     reader.readAsDataURL(file);
   });
