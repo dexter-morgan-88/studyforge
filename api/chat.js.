@@ -1,332 +1,71 @@
-// ============================================================
-// /api/chat.js  –  StudyForge AI Backend
-// CommonJS format — works on ALL Vercel versions
-// Handles text prompts + image uploads → Claude API
-// ============================================================
-
-// Raise body-size limit so image uploads don't get cut off
-module.exports.config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '20mb',
-    },
-  },
-};
-
 module.exports = async function handler(req, res) {
-
-  // ── CORS (required for browser → serverless requests) ──────
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed. Use POST.' });
-  }
+  const KEY = process.env.CLAUDE_API_KEY;
+  if (!KEY) return res.status(500).json({ error: 'CLAUDE_API_KEY not set in Vercel environment variables' });
 
-  // ── CHECK API KEY ───────────────────────────────────────────
-  const API_KEY = process.env.CLAUDE_API_KEY;
+  const { prompt, images } = req.body || {};
+  if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
 
-  if (!API_KEY || API_KEY.trim() === '') {
-    return res.status(500).json({
-      error: 'CLAUDE_API_KEY environment variable is not set. Go to Vercel → Project → Settings → Environment Variables → add CLAUDE_API_KEY → Redeploy.',
-    });
-  }
-
-  // ── PARSE BODY ──────────────────────────────────────────────
-  let prompt, images;
-
-  try {
-    const body = req.body;
-
-    if (!body || typeof body !== 'object') {
-      return res.status(400).json({ error: 'Request body must be JSON.' });
-    }
-
-    prompt = (body.prompt || '').trim();
-    images = Array.isArray(body.images) ? body.images : [];
-
-    if (!prompt) {
-      return res.status(400).json({ error: 'Missing required field: prompt' });
-    }
-
-  } catch (err) {
-    return res.status(400).json({ error: 'Could not parse request body: ' + err.message });
-  }
-
-  // ── BUILD CLAUDE MESSAGE CONTENT ────────────────────────────
-  // Claude multimodal: put images BEFORE the text
+  // Build content array — images first, then text
   const content = [];
 
-  for (let i = 0; i < images.length; i++) {
-    const img = images[i];
-    if (!img || !img.data || !img.media_type) continue;
-
-    // Strip "data:image/jpeg;base64," prefix if frontend sent the full data URL
-    let b64 = img.data;
-    if (b64.indexOf(',') !== -1) {
-      b64 = b64.split(',')[1];
-    }
-    b64 = (b64 || '').trim();
-    if (b64.length < 50) continue; // skip obviously broken data
-
-    // Only send image types Claude actually supports
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const mtype = allowed.includes(img.media_type) ? img.media_type : 'image/jpeg';
-
-    content.push({
-      type: 'image',
-      source: {
-        type: 'base64',
-        media_type: mtype,
-        data: b64,
-      },
-    });
-  }
-
-  // Text always goes last
-  content.push({ type: 'text', text: prompt });
-
-  // ── CALL CLAUDE API ─────────────────────────────────────────
-  let response;
-  try {
-    response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type':    'application/json',
-        'x-api-key':       API_KEY.trim(),
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        messages:   [{ role: 'user', content: content }],
-      }),
-    });
-  } catch (netErr) {
-    return res.status(502).json({
-      error: 'Network error reaching Claude API: ' + netErr.message,
-    });
-  }
-
-  // ── HANDLE CLAUDE ERRORS ────────────────────────────────────
-  if (!response.ok) {
-    let errBody = {};
-    try { errBody = await response.json(); } catch (_) {}
-
-    const status = response.status;
-    const msg    = (errBody.error && errBody.error.message) || JSON.stringify(errBody);
-
-    if (status === 401) return res.status(401).json({ error: 'Invalid Claude API key. Double-check CLAUDE_API_KEY in Vercel environment variables.' });
-    if (status === 429) return res.status(429).json({ error: 'Claude API rate limit. Wait a moment and try again.' });
-    if (status === 400) return res.status(400).json({ error: 'Bad request to Claude API: ' + msg });
-    if (status === 413) return res.status(413).json({ error: 'Image too large. Try a smaller image.' });
-
-    return res.status(status).json({ error: 'Claude API error (' + status + '): ' + msg });
-  }
-
-  // ── PARSE RESPONSE ──────────────────────────────────────────
-  let data;
-  try {
-    data = await response.json();
-  } catch (err) {
-    return res.status(500).json({ error: 'Failed to parse Claude response: ' + err.message });
-  }
-
-  const text =
-    data &&
-    data.content &&
-    Array.isArray(data.content) &&
-    data.content[0] &&
-    data.content[0].type === 'text'
-      ? data.content[0].text
-      : null;
-
-  if (!text || text.trim() === '') {
-    return res.status(500).json({ error: 'Claude returned an empty response. Please try again.' });
-  }
-
-  return res.status(200).json({ result: text });
-};
-  if (!API_KEY) {
-    console.error('[StudyForge] CLAUDE_API_KEY is not set in environment variables');
-    return res.status(500).json({
-      error: 'Server configuration error: API key not set. Go to Vercel → Project → Settings → Environment Variables → add CLAUDE_API_KEY → Redeploy.',
-    });
-  }
-
-  if (!API_KEY.startsWith('sk-ant-')) {
-    console.error('[StudyForge] CLAUDE_API_KEY looks invalid (should start with sk-ant-)');
-    return res.status(500).json({
-      error: 'Server configuration error: API key format is invalid.',
-    });
-  }
-
-  // ── 3. Parse request body ───────────────────────────────────
-  let prompt, images;
-
-  try {
-    // Vercel's bodyParser already parsed JSON for us
-    const body = req.body;
-
-    if (!body || typeof body !== 'object') {
-      return res.status(400).json({ error: 'Request body must be JSON.' });
-    }
-
-    prompt = body.prompt;
-    images = body.images; // optional array
-
-    if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
-      return res.status(400).json({ error: 'Missing required field: prompt' });
-    }
-
-  } catch (parseErr) {
-    console.error('[StudyForge] Body parse error:', parseErr.message);
-    return res.status(400).json({ error: 'Invalid JSON body: ' + parseErr.message });
-  }
-
-  // ── 4. Build Claude message content ────────────────────────
-  // Claude multimodal format: images FIRST, then text
-  const content = [];
-
-  if (Array.isArray(images) && images.length > 0) {
-    for (let i = 0; i < images.length; i++) {
-      const img = images[i];
-
-      // Validate each image object
-      if (!img || typeof img !== 'object') continue;
-      if (!img.data || typeof img.data !== 'string') {
-        console.warn('[StudyForge] Skipping image ' + i + ': missing base64 data');
-        continue;
-      }
-      if (!img.media_type || typeof img.media_type !== 'string') {
-        console.warn('[StudyForge] Skipping image ' + i + ': missing media_type');
-        continue;
-      }
-
-      // Strip data URL prefix if frontend accidentally included it
-      // e.g. "data:image/jpeg;base64,/9j/..." → "/9j/..."
-      let base64Data = img.data;
-      if (base64Data.includes(',')) {
-        base64Data = base64Data.split(',')[1];
-      }
-
-      // Validate media type is one Claude supports
-      const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      const mediaType = supportedTypes.includes(img.media_type)
-        ? img.media_type
-        : 'image/jpeg'; // fallback
-
+  if (Array.isArray(images)) {
+    for (const img of images) {
+      if (!img || !img.data || !img.media_type) continue;
+      let b64 = img.data;
+      if (b64.includes(',')) b64 = b64.split(',')[1];
+      if (!b64 || b64.length < 10) continue;
+      const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
       content.push({
         type: 'image',
         source: {
           type: 'base64',
-          media_type: mediaType,
-          data: base64Data,
+          media_type: allowed.includes(img.media_type) ? img.media_type : 'image/jpeg',
+          data: b64,
         },
       });
     }
   }
 
-  // Always add the text prompt last
-  content.push({
-    type: 'text',
-    text: prompt.trim(),
-  });
+  content.push({ type: 'text', text: String(prompt).trim() });
 
-  // ── 5. Call Claude API ──────────────────────────────────────
-  const claudeRequestBody = {
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: content,
-      },
-    ],
-  };
-
-  console.log('[StudyForge] Calling Claude API. Images:', content.length - 1, '| Prompt length:', prompt.length);
-
-  let claudeResponse;
-
+  let raw;
   try {
-    claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
+        'x-api-key': KEY,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify(claudeRequestBody),
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content }],
+      }),
     });
-  } catch (networkErr) {
-    console.error('[StudyForge] Network error reaching Claude API:', networkErr.message);
-    return res.status(502).json({
-      error: 'Could not reach Claude API. Check your internet connection or try again. Details: ' + networkErr.message,
-    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      const msg = (data.error && data.error.message) || JSON.stringify(data);
+      if (r.status === 401) return res.status(401).json({ error: 'Invalid API key: ' + msg });
+      if (r.status === 429) return res.status(429).json({ error: 'Rate limited. Try again in a moment.' });
+      return res.status(r.status).json({ error: 'Claude error: ' + msg });
+    }
+
+    raw = data?.content?.[0]?.text;
+    if (!raw) return res.status(500).json({ error: 'Claude returned empty response' });
+
+  } catch (e) {
+    return res.status(502).json({ error: 'Network error: ' + e.message });
   }
 
-  // ── 6. Handle Claude API errors ─────────────────────────────
-  if (!claudeResponse.ok) {
-    let errorBody = {};
-    try {
-      errorBody = await claudeResponse.json();
-    } catch (_) {
-      errorBody = { error: { message: 'Unknown error from Claude API' } };
-    }
-
-    const status = claudeResponse.status;
-    const msg = (errorBody.error && errorBody.error.message) || JSON.stringify(errorBody);
-
-    console.error('[StudyForge] Claude API error', status, msg);
-
-    // Give actionable messages for common errors
-    if (status === 401) {
-      return res.status(401).json({ error: 'Invalid Claude API key. Check CLAUDE_API_KEY in Vercel environment variables.' });
-    }
-    if (status === 429) {
-      return res.status(429).json({ error: 'Claude API rate limit hit. Please wait a moment and try again.' });
-    }
-    if (status === 400) {
-      return res.status(400).json({ error: 'Bad request to Claude API: ' + msg });
-    }
-    if (status === 413) {
-      return res.status(413).json({ error: 'Image or prompt too large. Try a smaller image or shorter text.' });
-    }
-
-    return res.status(status).json({ error: 'Claude API error (' + status + '): ' + msg });
-  }
-
-  // ── 7. Parse Claude response ─────────────────────────────────
-  let claudeData;
-  try {
-    claudeData = await claudeResponse.json();
-  } catch (jsonErr) {
-    console.error('[StudyForge] Failed to parse Claude response JSON:', jsonErr.message);
-    return res.status(500).json({ error: 'Failed to parse Claude API response.' });
-  }
-
-  // Extract text from response
-  const resultText =
-    claudeData &&
-    claudeData.content &&
-    claudeData.content[0] &&
-    claudeData.content[0].type === 'text'
-      ? claudeData.content[0].text
-      : null;
-
-  if (!resultText || resultText.trim() === '') {
-    console.error('[StudyForge] Claude returned empty content:', JSON.stringify(claudeData));
-    return res.status(500).json({ error: 'Claude returned an empty response. Please try again.' });
-  }
-
-  console.log('[StudyForge] Success. Response length:', resultText.length);
-
-  // ── 8. Return result ─────────────────────────────────────────
-  return res.status(200).json({ result: resultText });
-}
+  return res.status(200).json({ result: raw });
+};
