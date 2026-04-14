@@ -69,3 +69,37 @@ module.exports = async function handler(req, res) {
 
   return res.status(200).json({ result: raw });
 };
+  let raw;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content }],
+      }),
+    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      const msg = (data.error && data.error.message) || JSON.stringify(data);
+      if (r.status === 401) return res.status(401).json({ error: 'Invalid API key: ' + msg });
+      if (r.status === 429) return res.status(429).json({ error: 'Rate limited. Try again in a moment.' });
+      return res.status(r.status).json({ error: 'Claude error: ' + msg });
+    }
+
+    raw = data?.content?.[0]?.text;
+    if (!raw) return res.status(500).json({ error: 'Claude returned empty response' });
+
+  } catch (e) {
+    return res.status(502).json({ error: 'Network error: ' + e.message });
+  }
+
+  return res.status(200).json({ result: raw });
+};
